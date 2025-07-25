@@ -213,18 +213,14 @@ export default function Home() {
               <CardDescription>Here's a vision of your future self based on your aspirations.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                <div className="flex flex-col items-center">
-                  <h3 className="font-semibold mb-2">Your Photo</h3>
-                  {userImage ? 
+              <div className={`grid grid-cols-1 ${userImage ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-4 items-center`}>
+                {userImage && (
+                  <div className="flex flex-col items-center">
+                    <h3 className="font-semibold mb-2">Your Photo</h3>
                     <Image src={userImage} alt="User upload" width={300} height={300} className="rounded-lg shadow-md" data-ai-hint="person" />
-                    :
-                    <div className="w-[300px] h-[300px] bg-muted rounded-lg shadow-md flex items-center justify-center" data-ai-hint="placeholder person">
-                      <User className="w-24 h-24 text-muted-foreground" />
-                    </div>
-                  }
-                </div>
-                <div className="flex flex-col items-center">
+                  </div>
+                )}
+                <div className={`flex flex-col items-center ${!userImage ? 'col-span-1 md:col-span-1' : ''}`}>
                   <h3 className="font-semibold mb-2 text-primary">Your Future Self</h3>
                   {futureImage && <Image src={futureImage} alt="Generated future self" width={300} height={300} className="rounded-lg shadow-lg border-2 border-primary" data-ai-hint="futuristic person" />}
                 </div>

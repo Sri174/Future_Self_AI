@@ -80,7 +80,9 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
     } else {
         imageGenPromptParts.push({
             text: `Based on a psychometric analysis, a person has the following interests: ${input.interests} and mindset: ${input.mindset}. 
-            Generate an inspiring, high-quality, abstract and symbolic image of a person's future self that subtly incorporates elements reflecting their interests and mindset into the background or their attire.
+            Generate an inspiring, high-quality image of this person's future self, matching a profession based on the analysis.
+            The image should be a full-body or upper-body shot, not just legs or abstract elements.
+            The theme of the image, including the background and attire, should reflect their interests and mindset. 
             The final image should be realistic and inspiring, suggesting a successful and fulfilling future. Do not show the person's face.`,
         });
     }
