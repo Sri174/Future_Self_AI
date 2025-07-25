@@ -76,7 +76,7 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
         The generated image must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer).
         It is crucial that the generated person is clearly identifiable as the person from the photo. 
         The theme of the image, including the background and attire, should reflect their interests and mindset. 
-        The final image should be realistic and inspiring, suggesting a successful and fulfilling future career.`,
+        The final image should be realistic and inspiring, with a professional and candid style, suggesting a successful and fulfilling future career.`,
       });
     } else {
         imageGenPromptParts.push({
@@ -84,7 +84,7 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
             Generate an inspiring, high-quality, photorealistic image of this person's future self, matching a profession based on the analysis.
             The image should be a full-body or upper-body shot, not just legs or abstract elements, and it must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer).
             The theme of the image, including the background and attire, should reflect their interests and mindset. 
-            The final image should be realistic and inspiring, suggesting a successful and fulfilling future. Do not show the person's face.`,
+            The final image should be realistic and inspiring, with a professional and candid style, suggesting a successful and fulfilling future. Do not show the person's face.`,
         });
     }
 
