@@ -4,130 +4,136 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, LoaderCircle, ArrowRight, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle, Megaphone, Group, Trophy, DollarSign, PenTool, Video, Search, Repeat, Briefcase, Globe}
+import { List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, LoaderCircle, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign }
 from 'lucide-react';
 
 const icons: { [key: string]: React.ElementType } = {
-  Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle, Megaphone, Group, Trophy, DollarSign, PenTool, Video, Search, Repeat, Briefcase, Globe
+  List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign
 };
 
 const questions = [
   {
     id: 'q1',
-    text: 'What excites you the most?',
+    text: 'When learning something new, you prefer:',
     options: [
-      { id: 'a1', text: 'Exploring new technologies or space', icon: 'Rocket' },
-      { id: 'a2', text: 'Creating art, music, or stories', icon: 'Paintbrush' },
-      { id: 'a3', text: 'Solving puzzles or complex problems', icon: 'Puzzle' },
-      { id: 'a4', text: 'Helping others (people, animals, environment)', icon: 'HeartHandshake' },
+      { id: 'a1', text: 'Structured, step-by-step instructions', icon: 'List' },
+      { id: 'a2', text: 'Exploring freely and making connections', icon: 'Orbit' },
+      { id: 'a3', text: 'Deep analysis before trying', icon: 'BrainCircuit' },
+      { id: 'a4', text: 'Immediate hands-on practice', icon: 'Wrench' },
     ],
   },
   {
     id: 'q2',
-    text: 'Your ideal weekend involves:',
+    text: 'Your problem-solving style is:',
     options: [
-      { id: 'a1', text: 'Reading/learning something new', icon: 'BookOpen' },
-      { id: 'a2', text: 'Gaming or building digital projects', icon: 'Cpu' },
-      { id: 'a3', text: 'Outdoor adventures or sports', icon: 'Mountain' },
-      { id: 'a4', text: 'Socializing with friends', icon: 'Users' },
+      { id: 'a1', text: 'Logical and systematic', icon: 'Puzzle' },
+      { id: 'a2', text: 'Intuitive and creative', icon: 'Lightbulb' },
+      { id: 'a3', text: 'Research-driven and detail-oriented', icon: 'BookOpen' },
+      { id: 'a4', text: 'Trial-and-error experimentation', icon: 'FlaskConical' },
     ],
   },
   {
     id: 'q3',
-    text: 'Choose a superpower:',
+    text: 'Under pressure, your mind:',
     options: [
-      { id: 'a1', text: 'Super intelligence (solve any problem)', icon: 'BrainCircuit' },
-      { id: 'a2', text: 'Creativity (invent anything imaginable)', icon: 'Sparkles' },
-      { id: 'a3', text: 'Leadership (inspire and guide others)', icon: 'Megaphone' },
-      { id: 'a4', text: 'Empathy (understand everyone’s feelings)', icon: 'Heart' },
+      { id: 'a1', text: 'Stays calm and focused', icon: 'Brain' },
+      { id: 'a2', text: 'Generates rapid, impulsive ideas', icon: 'Sparkles' },
+      { id: 'a3', text: 'Overanalyzes and hesitates', icon: 'Search' },
+      { id: 'a4', text: 'Shifts between ideas quickly', icon: 'RefreshCw' },
     ],
   },
   {
     id: 'q4',
-    text: 'In a group project, you’re most likely to:',
+    text: 'When someone disagrees with you, you:',
     options: [
-      { id: 'a1', text: 'Lead and delegate tasks', icon: 'Crown' },
-      { id: 'a2', text: 'Brainstorm innovative ideas', icon: 'Lightbulb' },
-      { id: 'a3', text: 'Organize and structure the work', icon: 'Book' },
-      { id: 'a4', text: 'Support others quietly', icon: 'Handshake' },
+      { id: 'a1', text: 'Listen and seek common ground', icon: 'Handshake' },
+      { id: 'a2', text: 'Feel frustrated but try to explain', icon: 'MessageSquare' },
+      { id: 'a3', text: 'Avoid conflict and retreat', icon: 'Shield' },
+      { id: 'a4', text: 'Defend your view passionately', icon: 'Sparkles' },
     ],
   },
   {
     id: 'q5',
-    text: 'When faced with failure, you:',
+    text: 'Your reaction to criticism is:',
     options: [
-      { id: 'a1', text: 'Try again immediately', icon: 'Repeat' },
-      { id: 'a2', text: 'Analyze what went wrong', icon: 'Search' },
-      { id: 'a3', text: 'Take a break and reflect', icon: 'Brain' },
-      { id: 'a4', text: 'Ask for help', icon: 'MessageSquare' },
+      { id: 'a1', text: 'Reflect and improve', icon: 'Brain' },
+      { id: 'a2', text: 'Dismiss it if it feels unfair', icon: 'Shield' },
+      { id: 'a3', text: 'Take it personally', icon: 'Heart' },
+      { id: 'a4', text: 'Analyze its validity objectively', icon: 'Scale' },
     ],
   },
   {
     id: 'q6',
-    text: 'Your strength is:',
+    text: 'In team conflicts, you usually:',
     options: [
-      { id: 'a1', text: 'Logical problem-solving', icon: 'Puzzle' },
-      { id: 'a2', text: 'Emotional intelligence', icon: 'Heart' },
-      { id: 'a3', text: 'Risk-taking and adaptability', icon: 'Rocket' },
-      { id: 'a4', text: 'Attention to detail', icon: 'PenTool' },
+      { id: 'a1', text: 'Mediate and resolve tensions', icon: 'Handshake' },
+      { id: 'a2', text: 'Focus on goals over feelings', icon: 'Briefcase' },
+      { id: 'a3', text: 'Withdraw to avoid drama', icon: 'User' },
+      { id: 'a4', text: 'Advocate for your perspective', icon: 'MessageSquare' },
     ],
   },
   {
     id: 'q7',
-    text: 'You believe talent is:',
+    text: 'Your energy comes from:',
     options: [
-      { id: 'a1', text: 'Something you can develop (growth mindset)', icon: 'TrendingUp' },
-      { id: 'a2', text: 'Mostly innate (fixed mindset)', icon: 'Shield' },
+      { id: 'a1', text: 'Alone time (recharges you)', icon: 'Brain' },
+      { id: 'a2', text: 'Social interactions (fuels you)', icon: 'Users' },
+      { id: 'a3', text: 'Achieving goals (motivates you)', icon: 'Star' },
+      { id: 'a4', text: 'Creative expression (inspires you)', icon: 'Paintbrush' },
     ],
   },
   {
     id: 'q8',
-    text: 'When something is challenging, you feel:',
+    text: 'When plans change suddenly, you:',
     options: [
-      { id: 'a1', text: 'Motivated to learn', icon: 'Star' },
-      { id: 'a2', text: 'Frustrated but persistent', icon: 'TrendingUp' }, //trending down not available
-      { id: 'a3', text: 'Overwhelmed and avoid it', icon: 'Shield' },
+      { id: 'a1', text: 'Adapt easily', icon: 'RefreshCw' },
+      { id: 'a2', text: 'Feel annoyed but adjust', icon: 'TrendingDown' },
+      { id: 'a3', text: 'Overthink the implications', icon: 'BrainCircuit' },
+      { id: 'a4', text: 'Struggle to pivot', icon: 'Shield' },
     ],
   },
   {
     id: 'q9',
-    text: 'Feedback helps you:',
+    text: 'Your default communication style:',
     options: [
-      { id: 'a1', text: 'Improve and grow', icon: 'Rocket' },
-      { id: 'a2', text: 'Defend your approach', icon: 'Shield' },
-      { id: 'a3', text: 'Feel discouraged', icon: 'TrendingUp' }, //trending down not available
+      { id: 'a1', text: 'Precise and factual', icon: 'PenTool' },
+      { id: 'a2', text: 'Storytelling and metaphors', icon: 'BookOpen' },
+      { id: 'a3', text: 'Diplomatic and empathetic', icon: 'Handshake' },
+      { id: 'a4', text: 'Direct and concise', icon: 'MessageSquare' },
     ],
   },
   {
     id: 'q10',
-    text: 'Your dream work environment:',
+    text: 'Under stress, you tend to:',
     options: [
-      { id: 'a1', text: 'Remote (anywhere in the world)', icon: 'Globe' },
-      { id: 'a2', text: 'High-tech office/lab', icon: 'Building2' },
-      { id: 'a3', text: 'Creative/artistic studio', icon: 'Paintbrush' },
-      { id: 'a4', text: 'Fast-paced startup', icon: 'Rocket' },
+      { id: 'a1', text: 'Breathe and refocus', icon: 'Brain' },
+      { id: 'a2', text: 'Work harder to distract yourself', icon: 'Wrench' },
+      { id: 'a3', text: 'Shut down and procrastinate', icon: 'Shield' },
+      { id: 'a4', text: 'Seek novel solutions', icon: 'Lightbulb' },
     ],
   },
   {
     id: 'q11',
-    text: 'You’d rather:',
+    text: 'Your biggest motivator is:',
     options: [
-      { id: 'a1', text: 'Build systems (tech, engineering)', icon: 'Wrench' },
-      { id: 'a2', text: 'Express ideas (art, writing, design)', icon: 'PenTool' },
-      { id: 'a3', text: 'Lead teams (business, politics)', icon: 'Briefcase' },
-      { id: 'a4', text: 'Discover new knowledge (science, research)', icon: 'FlaskConical' },
+      { id: 'a1', text: 'Achievement and recognition', icon: 'Star' },
+      { id: 'a2', text: 'Passion for the work itself', icon: 'Heart' },
+      { id: 'a3', text: 'Impact on others/society', icon: 'Globe' },
+      { id: 'a4', text: 'Financial security', icon: 'DollarSign' },
     ],
   },
   {
     id: 'q12',
-    text: 'Salary vs. Passion:',
+    text: 'Failure feels like:',
     options: [
-      { id: 'a1', text: 'High salary (even if work is boring)', icon: 'DollarSign' },
-      { id: 'a2', text: 'Passionate work (even if lower pay)', icon: 'Heart' },
-      { id: 'a3', text: 'Balance of both', icon: 'Scale' },
+      { id: 'a1', text: 'A learning opportunity', icon: 'BookOpen' },
+      { id: 'a2', text: 'A setback to overcome', icon: 'Repeat' },
+      { id: 'a3', text: 'A personal flaw', icon: 'Shield' },
+      { id: 'a4', text: 'A temporary obstacle', icon: 'Wrench' },
     ],
   },
 ];
+
 
 interface QuizProps {
   onSubmit: (answers: Record<string, string>) => void;
