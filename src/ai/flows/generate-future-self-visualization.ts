@@ -14,8 +14,9 @@ import {z} from 'genkit';
 const GenerateFutureSelfVisualizationInputSchema = z.object({
   photoDataUri: z
     .string()
+    .nullable()
     .describe(
-      "A photo of the student, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "A photo of the student, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'. Can be null if skipped."
     ),
   interests: z
     .string()
@@ -65,20 +66,29 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
   async input => {
     const textGenPromise = textGenerationPrompt(input);
 
+    const imageGenPromptParts: any[] = [];
+    if (input.photoDataUri) {
+      imageGenPromptParts.push({ media: { url: input.photoDataUri } });
+      imageGenPromptParts.push({
+        text: `Critically analyze the provided photo. Your primary goal is to maintain the exact likeness, facial features, and ethnicity of the person in the photo.
+          Based on a psychometric analysis, this person has the following interests: ${input.interests} and mindset: ${input.mindset}.
+          Generate a new, inspiring, high-quality image of this person's future self.
+          It is crucial that the generated person is clearly identifiable as the person from the photo.
+          Subtly incorporate elements that reflect their interests and mindset into the background or their attire.
+          The final image should be realistic and inspiring, suggesting a successful and fulfilling future.`,
+      });
+    } else {
+        imageGenPromptParts.push({
+            text: `Based on a psychometric analysis, a person has the following interests: ${input.interests} and mindset: ${input.mindset}. 
+            Generate an inspiring, high-quality, abstract and symbolic image of a person's future self that subtly incorporates elements reflecting their interests and mindset into the background or their attire.
+            The final image should be realistic and inspiring, suggesting a successful and fulfilling future. Do not show the person's face.`,
+        });
+    }
+
+
     const imageGenPromise = ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: [
-        {media: {url: input.photoDataUri}},
-        {
-          text:
-            `Critically analyze the provided photo. Your primary goal is to maintain the exact likeness, facial features, and ethnicity of the person in the photo.
-            Based on a psychometric analysis, this person has the following interests: ${input.interests} and mindset: ${input.mindset}.
-            Generate a new, inspiring, high-quality image of this person's future self.
-            It is crucial that the generated person is clearly identifiable as the person from the photo.
-            Subtly incorporate elements that reflect their interests and mindset into the background or their attire.
-            The final image should be realistic and inspiring, suggesting a successful and fulfilling future.`,
-        },
-      ],
+      prompt: imageGenPromptParts,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
       },

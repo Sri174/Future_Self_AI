@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle } from 'lucide-react';
+import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward } from 'lucide-react';
 import { answerMCQQuestions, AnswerMCQQuestionsInput } from '@/ai/flows/answer-mcq-questions';
 import { generateFutureSelfVisualization } from '@/ai/flows/generate-future-self-visualization';
 import { useToast } from "@/hooks/use-toast";
@@ -79,10 +79,6 @@ export default function Home() {
   };
 
   const handleImageSubmit = async () => {
-    if (!userImage) {
-      toast({ title: "No Image", description: "Please upload an image to continue.", variant: "destructive" });
-      return;
-    }
     setIsLoading(true);
     setStep('generating');
     try {
@@ -106,6 +102,11 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+
+  const handleSkipPhoto = () => {
+    setUserImage(null);
+    handleImageSubmit();
+  }
 
   const resetApp = () => {
     setStep('intro');
@@ -181,13 +182,18 @@ export default function Home() {
             <CardHeader className="text-center">
                <User className="mx-auto h-12 w-12 text-primary" />
               <CardTitle className="text-2xl font-bold mt-4">Upload a Photo</CardTitle>
-              <CardDescription>Upload a clear, front-facing photo of yourself.</CardDescription>
+              <CardDescription>Upload a clear, front-facing photo of yourself. (Optional)</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 flex flex-col items-center">
+            <CardContent className="space-y-4 flex flex-col items-center">
               <ImageUploader onImageUpload={setUserImage} />
-              <Button size="lg" onClick={handleImageSubmit} disabled={!userImage || isLoading}>
-                {isLoading ? <><LoaderCircle className="animate-spin mr-2" />Generating...</> : <>Generate My Future Self <Sparkles className="ml-2" /></>}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                <Button size="lg" onClick={handleImageSubmit} disabled={!userImage || isLoading}>
+                  {isLoading ? <><LoaderCircle className="animate-spin mr-2" />Generating...</> : <>Generate My Future Self <Sparkles className="ml-2" /></>}
+                </Button>
+                <Button size="lg" variant="ghost" onClick={handleSkipPhoto} disabled={isLoading}>
+                  Skip for now <SkipForward className="ml-2" />
+                </Button>
+              </div>
             </CardContent>
           </motion.div>
         );
@@ -210,7 +216,13 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                 <div className="flex flex-col items-center">
                   <h3 className="font-semibold mb-2">Your Photo</h3>
-                  {userImage && <Image src={userImage} alt="User upload" width={300} height={300} className="rounded-lg shadow-md" data-ai-hint="person" />}
+                  {userImage ? 
+                    <Image src={userImage} alt="User upload" width={300} height={300} className="rounded-lg shadow-md" data-ai-hint="person" />
+                    :
+                    <div className="w-[300px] h-[300px] bg-muted rounded-lg shadow-md flex items-center justify-center" data-ai-hint="placeholder person">
+                      <User className="w-24 h-24 text-muted-foreground" />
+                    </div>
+                  }
                 </div>
                 <div className="flex flex-col items-center">
                   <h3 className="font-semibold mb-2 text-primary">Your Future Self</h3>
