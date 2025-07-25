@@ -8,7 +8,7 @@ import { answerMCQQuestions, AnswerMCQQuestionsInput } from '@/ai/flows/answer-m
 import { generateFutureSelfVisualization } from '@/ai/flows/generate-future-self-visualization';
 import { useToast } from "@/hooks/use-toast";
 import Header from '@/components/header';
-import Quiz from '@/components/quiz';
+import Quiz, { questions } from '@/components/quiz';
 import ImageUploader from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -251,3 +251,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

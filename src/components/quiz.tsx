@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -8,10 +9,10 @@ import { List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskCo
 from 'lucide-react';
 
 const icons: { [key: string]: React.ElementType } = {
-  List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign
+  List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign, LoaderCircle
 };
 
-const questions = [
+export const questions = [
   {
     id: 'q1',
     text: 'When learning something new, you prefer:',
@@ -226,3 +227,5 @@ const Quiz: React.FC<QuizProps> = ({ onSubmit, onProgressUpdate, isLoading }) =>
 };
 
 export default Quiz;
+
+    
