@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward } from 'lucide-react';
 import { answerMCQQuestions, AnswerMCQQuestionsInput } from '@/ai/flows/answer-mcq-questions';
@@ -16,22 +16,6 @@ import { Progress } from "@/components/ui/progress";
 import Image from 'next/image';
 
 type Step = 'intro' | 'quiz' | 'summary' | 'upload' | 'generating' | 'result';
-
-const quizQuestions = [
-  { id: 'q1', text: 'What excites you the most?' },
-  { id: 'q2', text: 'Your ideal weekend involves:' },
-  { id: 'q3', text: 'Choose a superpower:' },
-  { id: 'q4', text: 'In a group project, you’re most likely to:' },
-  { id: 'q5', text: 'When faced with failure, you:' },
-  { id: 'q6', text: 'Your strength is:' },
-  { id: 'q7', text: 'You believe talent is:' },
-  { id: 'q8', text: 'When something is challenging, you feel:' },
-  { id: 'q9', text: 'Feedback helps you:' },
-  { id: 'q10', text: 'Your dream work environment:' },
-  { id: 'q11', text: 'You’d rather:' },
-  { id: 'q12', text: 'Salary vs. Passion:' },
-];
-
 
 export default function Home() {
   const [step, setStep] = useState<Step>('intro');
@@ -50,16 +34,15 @@ export default function Home() {
   const handleQuizSubmit = async (answers: Record<string, string>) => {
     setIsLoading(true);
     setQuizAnswers(answers);
-    
-    const questionsMap = new Map(quizQuestions.map(q => [q.id, q.text]));
-    const formattedAnswers: Record<string, string> = {};
+
+    const formattedAnswers: AnswerMCQQuestionsInput['answers'] = {};
     for (const qId in answers) {
-      const qText = questionsMap.get(qId);
-      if (qText) {
-        formattedAnswers[qText] = answers[qId];
+      const question = questions.find(q => q.id === qId);
+      if (question) {
+        formattedAnswers[question.text] = answers[qId];
       }
     }
-
+    
     const input: AnswerMCQQuestionsInput = {
       answers: formattedAnswers
     };
