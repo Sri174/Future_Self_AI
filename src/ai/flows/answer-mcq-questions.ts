@@ -32,15 +32,19 @@ const prompt = ai.definePrompt({
   name: 'answerMCQQuestionsPrompt',
   input: {schema: AnswerMCQQuestionsInputSchema},
   output: {schema: AnswerMCQQuestionsOutputSchema},
-  prompt: `You are an AI assistant who is an expert in psychometric analysis. Your goal is to analyze a student's answers to a multiple-choice quiz and provide a concise analysis of their interests, mindset, and an overall summary.
+  prompt: `You are an expert psychometric analyst AI. Your task is to analyze a user's answers from a multiple-choice questionnaire to create a detailed personality and career profile.
 
-  Analyze the following answers and generate a response in the format specified.
+Based on the answers provided, generate:
+1.  **Interests**: A concise summary of the user's key interests and passions. Identify primary themes like Technology, Arts, Humanitarianism, or Logic/Problem-Solving.
+2.  **Mindset**: A description of the user's mindset (e.g., Growth, Fixed, Adaptable, Reflective) based on their responses to challenges, failure, and learning.
+3.  **Summary**: A holistic summary combining their interests and mindset into a compelling narrative about their potential and work style.
 
-  Answers:
-  {{#each answers}}
-    - Question: {{@key}}, Answer: {{this}}
-  {{/each}}
-  `,
+Analyze the following answers:
+{{#each answers}}
+- Question: {{@key}}
+- Answer: {{this}}
+{{/each}}
+`,
 });
 
 const answerMCQQuestionsFlow = ai.defineFlow(
