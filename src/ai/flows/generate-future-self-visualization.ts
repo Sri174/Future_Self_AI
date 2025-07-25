@@ -20,7 +20,7 @@ const GenerateFutureSelfVisualizationInputSchema = z.object({
     ),
   interests: z
     .string()
-    .describe(`A comma separated list of the student's interests based on their MCQ answers.`), 
+    .describe(`A comma separated list of the student's interests based on their MCQ answers.`),
   mindset: z.string().describe(`A description of the student's mindset.`),
 });
 export type GenerateFutureSelfVisualizationInput = z.infer<
@@ -79,7 +79,7 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
         imageGenPromptParts.push({
             text: `Based on a psychometric analysis, a person has interests in '${input.interests}' and a '${input.mindset}' mindset.
             Generate an inspiring, high-quality, and photorealistic image of this person's future self. This image must clearly represent a profession suggested by their interests.
-            The image should be a full-body or upper-body shot, not just abstract elements, and must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer).
+            The image should be a full-body or upper-body shot, not just abstract elements, and must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer, a sterile lab for a scientist, or a creative studio for an artist).
             The theme of the image, including the background and attire, should reflect their interests and mindset. 
             The final image should be realistic and inspiring, with a professional and candid style, suggesting a successful and fulfilling future. Do not show the person's face.`,
         });
