@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -215,8 +216,8 @@ export default function Home() {
               <CardTitle className="text-3xl font-bold">Your Future Awaits!</CardTitle>
               <CardDescription>Here's a vision of your future self based on your aspirations.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="w-full aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
+            <CardContent className="space-y-6 flex flex-col items-center">
+              <div className="w-full max-w-md aspect-square bg-muted rounded-lg flex items-center justify-center relative overflow-hidden shadow-lg border-2 border-primary">
                 {futureImage ? (
                   <Image src={futureImage} alt="Generated future self" layout="fill" className="object-cover" data-ai-hint="futuristic person" />
                 ) : (
@@ -224,21 +225,8 @@ export default function Home() {
                 )}
               </div>
               
-              <div className={`grid grid-cols-1 ${userImage ? 'md:grid-cols-2' : ''} gap-4 items-center`}>
-                {userImage && (
-                  <div className="flex flex-col items-center">
-                    <h3 className="font-semibold mb-2">Your Photo</h3>
-                    <Image src={userImage} alt="User upload" width={300} height={300} className="rounded-lg shadow-md" data-ai-hint="person" />
-                  </div>
-                )}
-                <div className={`flex flex-col items-center ${userImage ? '' : 'col-span-1'}`}>
-                  <h3 className="font-semibold mb-2 text-primary">Your Future Self (Image)</h3>
-                  {futureImage && <Image src={futureImage} alt="Generated future self" width={300} height={300} className="rounded-lg shadow-lg border-2 border-primary" data-ai-hint="futuristic person" />}
-                </div>
-              </div>
-              
               {futureSelfDescription && (
-                <Card className="mt-4 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-card-foreground">
+                <Card className="mt-4 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-card-foreground w-full">
                   <CardContent className="p-6">
                     <p className="text-lg italic leading-relaxed text-center">{futureSelfDescription}</p>
                   </CardContent>
