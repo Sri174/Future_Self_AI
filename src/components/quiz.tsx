@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign }
+import { List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign, LoaderCircle }
 from 'lucide-react';
 
 const icons: { [key: string]: React.ElementType } = {
