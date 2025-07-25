@@ -4,61 +4,118 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, LoaderCircle, ArrowRight } from 'lucide-react';
+import { Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, LoaderCircle, ArrowRight, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle}
+from 'lucide-react';
 
 const icons: { [key: string]: React.ElementType } = {
-  Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star
+  Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle
 };
 
 const questions = [
   {
     id: 'q1',
-    text: 'When you imagine your ideal future, what environment are you in?',
+    text: 'What excites you the most?',
     options: [
-      { id: 'a1', text: 'Innovative Lab', icon: 'Cpu' },
-      { id: 'a2', text: 'Quiet Nature', icon: 'TreePine' },
-      { id: 'a3', text: 'Bustling City', icon: 'Building2' },
-      { id: 'a4', text: 'Creative Studio', icon: 'Paintbrush' },
+      { id: 'a1', text: 'Exploring new worlds', icon: 'Orbit' },
+      { id: 'a2', text: 'Solving puzzles', icon: 'Puzzle' },
+      { id: 'a3', text: 'Creating new things', icon: 'Sparkle' },
+      { id: 'a4', text: 'Talking to people', icon: 'MessageSquare' },
+      { id: 'a5', text: 'Cooking and experimenting', icon: 'UtensilsCrossed' },
     ],
   },
   {
     id: 'q2',
-    text: 'Which of these values is most important to you?',
+    text: 'Pick a dream activity:',
     options: [
-      { id: 'a1', text: 'Knowledge', icon: 'BookOpen' },
-      { id: 'a2', text: 'Community', icon: 'Users' },
-      { id: 'a3', text: 'Creativity', icon: 'Lightbulb' },
-      { id: 'a4', text: 'Impact', icon: 'TrendingUp' },
+      { id: 'a1', text: 'Fly a spaceship', icon: 'Rocket' },
+      { id: 'a2', text: 'Build a robot', icon: 'Wrench' },
+      { id: 'a3', text: 'Care for animals', icon: 'PawPrint' },
+      { id: 'a4', text: 'Direct a movie', icon: 'Clapperboard' },
+      { id: 'a5', text: 'Train like an athlete', icon: 'Dumbbell' },
     ],
   },
   {
     id: 'q3',
-    text: 'What kind of problems are you most passionate about solving?',
+    text: 'You prefer to...',
     options: [
-      { id: 'a1', text: 'Technological', icon: 'Code' },
-      { id: 'a2', text: 'Social', icon: 'HeartHandshake' },
-      { id: 'a3', text: 'Environmental', icon: 'Leaf' },
-      { id: 'a4', text: 'Artistic', icon: 'Music' },
+      { id: 'a1', text: 'Work alone', icon: 'User' },
+      { id: 'a2', text: 'Work with people', icon: 'Users2' },
+      { id: 'a3', text: 'Work with machines/tools', icon: 'Wrench' },
+      { id: 'a4', text: 'Work with nature', icon: 'Leaf' },
     ],
   },
   {
     id: 'q4',
-    text: 'How do you prefer to learn and grow?',
+    text: 'Pick a superpower:',
     options: [
-      { id: 'a1', text: 'Hands-on', icon: 'Wrench' },
-      { id: 'a2', text: 'Theoretically', icon: 'BrainCircuit' },
-      { id: 'a3', text: 'Collaboratively', icon: 'MessageSquare' },
-      { id: 'a4', text: 'Independently', icon: 'User' },
+      { id: 'a1', text: 'Super-intelligence', icon: 'BrainCircuit' },
+      { id: 'a2', text: 'Build anything', icon: 'Wrench' },
+      { id: 'a3', text: 'Make people laugh', icon: 'MessageSquare' },
+      { id: 'a4', text: 'Speak every language', icon: 'MessageSquare' }, // Using MessageSquare for language too
+      { id: 'a5', text: 'Heal others', icon: 'HeartHandshake' },
     ],
   },
   {
     id: 'q5',
-    text: 'What is your ultimate ambition?',
+    text: 'If you could live in any time...',
     options: [
-      { id: 'a1', text: 'To be a Leader', icon: 'Crown' },
-      { id: 'a2', text: 'To be an Innovator', icon: 'Rocket' },
-      { id: 'a3', text: 'To be a Helper', icon: 'Shield' },
-      { id: 'a4', text: 'To be a Creator', icon: 'Star' },
+      { id: 'a1', text: 'The past', icon: 'Book' },
+      { id: 'a2', text: 'The present', icon: 'Tent' },
+      { id: 'a3', text: 'The future', icon: 'Rocket' },
+    ],
+  },
+  {
+    id: 'q6',
+    text: 'Pick your favorite school subject:',
+    options: [
+      { id: 'a1', text: 'Science', icon: 'FlaskConical' },
+      { id: 'a2', text: 'Art', icon: 'Palette' },
+      { id: 'a3', text: 'Literature', icon: 'BookOpen' },
+      { id: 'a4', text: 'Math', icon: 'Calculator' },
+      { id: 'a5', text: 'Sports', icon: 'Dumbbell' },
+    ],
+  },
+  {
+    id: 'q7',
+    text: 'Your ideal weekend involves:',
+    options: [
+      { id: 'a1', text: 'Adventure', icon: 'Mountain' },
+      { id: 'a2', text: 'Music or videos', icon: 'Headset' },
+      { id: 'a3', text: 'Puzzles or games', icon: 'Puzzle' },
+      { id: 'a4', text: 'Nature walks', icon: 'Leaf' },
+      { id: 'a5', text: 'Helping family or friends', icon: 'Handshake' },
+    ],
+  },
+  {
+    id: 'q8',
+    text: 'How do you make decisions?',
+    options: [
+      { id: 'a1', text: 'I think deeply', icon: 'BrainCircuit' },
+      { id: 'a2', text: 'I follow my heart', icon: 'Heart' },
+      { id: 'a3', text: 'I weigh the pros & cons', icon: 'Scale' },
+      { id: 'a4', text: 'I go with the flow', icon: 'Dice5' },
+    ],
+  },
+  {
+    id: 'q9',
+    text: `When you grow up, you'd love to…`,
+    options: [
+      { id: 'a1', text: 'Explore space', icon: 'Orbit' },
+      { id: 'a2', text: 'Invent new tech', icon: 'Wrench' },
+      { id: 'a3', text: 'Inspire crowds', icon: 'Mic' },
+      { id: 'a4', text: 'Open a cafe', icon: 'UtensilsCrossed' },
+      { id: 'a5', text: 'Save the world', icon: 'Sword' },
+    ],
+  },
+  {
+    id: 'q10',
+    text: 'Pick one word that describes you:',
+    options: [
+      { id: 'a1', text: 'Curious', icon: 'Sparkles' },
+      { id: 'a2', text: 'Brave', icon: 'Shield' },
+      { id: 'a3', text: 'Creative', icon: 'Palette' },
+      { id: 'a4', text: 'Calm', icon: 'TreePine' },
+      { id: 'a5', text: 'Fun', icon: 'MessageSquare' }, // Using MessageSquare for fun too
     ],
   },
 ];

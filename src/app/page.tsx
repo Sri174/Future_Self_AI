@@ -18,19 +18,27 @@ type Step = 'intro' | 'quiz' | 'summary' | 'upload' | 'generating' | 'result';
 
 // This data is needed to correctly format the input for the `answerMCQQuestions` flow.
 const quizQuestions = [
-  { id: 'q1', text: 'When you imagine your ideal future, what environment are you in?' },
-  { id: 'q2', text: 'Which of these values is most important to you?' },
-  { id: 'q3', text: 'What kind of problems are you most passionate about solving?' },
-  { id: 'q4', text: 'How do you prefer to learn and grow?' },
-  { id: 'q5', text: 'What is your ultimate ambition?' },
+  { id: 'q1', text: 'What excites you the most?' },
+  { id: 'q2', text: 'Pick a dream activity:' },
+  { id: 'q3', text: 'You prefer to...' },
+  { id: 'q4', text: 'Pick a superpower:' },
+  { id: 'q5', text: 'If you could live in any time...' },
+  { id: 'q6', text: 'Pick your favorite school subject:' },
+  { id: 'q7', text: 'Your ideal weekend involves:' },
+  { id: 'q8', text: 'How do you make decisions?' },
+  { id: 'q9', text: `When you grow up, you'd love to…` },
+  { id: 'q10', text: 'Pick one word that describes you:' },
 ];
 
 export default function Home() {
   const [step, setStep] = useState<Step>('intro');
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [profileSummary, setProfileSummary] = useState('');
+  const [interests, setInterests] = useState('');
+  const [mindset, setMindset] = useState('');
   const [userImage, setUserImage] = useState<string | null>(null);
   const [futureImage, setFutureImage] = useState<string | null>(null);
+  const [futureSelfDescription, setFutureSelfDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -56,6 +64,8 @@ export default function Home() {
     try {
       const result = await answerMCQQuestions(input);
       setProfileSummary(result.summary);
+      setInterests(result.interests);
+      setMindset(result.mindset);
       setStep('summary');
     } catch (error) {
       console.error(error);
@@ -77,13 +87,13 @@ export default function Home() {
     setIsLoading(true);
     setStep('generating');
     try {
-      const interests = Object.values(quizAnswers).join(', ');
       const result = await generateFutureSelfVisualization({
         photoDataUri: userImage,
         interests: interests,
-        mindset: profileSummary,
+        mindset: mindset,
       });
       setFutureImage(result.generatedImage);
+      setFutureSelfDescription(result.futureSelfDescription);
       setStep('result');
     } catch (error) {
       console.error(error);
@@ -102,8 +112,11 @@ export default function Home() {
     setStep('intro');
     setQuizAnswers({});
     setProfileSummary('');
+    setInterests('');
+    setMindset('');
     setUserImage(null);
     setFutureImage(null);
+    setFutureSelfDescription('');
     setProgress(0);
   };
 
@@ -205,6 +218,13 @@ export default function Home() {
                   {futureImage && <Image src={futureImage} alt="Generated future self" width={300} height={300} className="rounded-lg shadow-lg border-2 border-primary" data-ai-hint="futuristic person" />}
                 </div>
               </div>
+              {futureSelfDescription && (
+                <Card className="mt-4 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-card-foreground">
+                  <CardContent className="p-6">
+                    <p className="text-lg italic leading-relaxed text-center">{futureSelfDescription}</p>
+                  </CardContent>
+                </Card>
+              )}
               <div className="flex justify-center gap-4 pt-4">
                 <Button variant="outline" onClick={resetApp}>
                   <Repeat className="mr-2" /> Start Over

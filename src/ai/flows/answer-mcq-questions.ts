@@ -18,6 +18,8 @@ const AnswerMCQQuestionsInputSchema = z.object({
 export type AnswerMCQQuestionsInput = z.infer<typeof AnswerMCQQuestionsInputSchema>;
 
 const AnswerMCQQuestionsOutputSchema = z.object({
+  interests: z.string().describe("A summary of the student's key interests based on their answers."),
+  mindset: z.string().describe("A summary of the student's mindset based on their answers."),
   summary: z.string().describe('A summary of the student\'s interests and mindset based on their answers.'),
 });
 export type AnswerMCQQuestionsOutput = z.infer<typeof AnswerMCQQuestionsOutputSchema>;
@@ -30,9 +32,9 @@ const prompt = ai.definePrompt({
   name: 'answerMCQQuestionsPrompt',
   input: {schema: AnswerMCQQuestionsInputSchema},
   output: {schema: AnswerMCQQuestionsOutputSchema},
-  prompt: `You are an AI assistant designed to summarize a student's interests and mindset based on their answers to multiple-choice questions.
+  prompt: `You are an AI assistant who is an expert in psychometric analysis. Your goal is to analyze a student's answers to a multiple-choice quiz and provide a concise analysis of their interests, mindset, and an overall summary.
 
-  Given the following answers, provide a concise summary of the student's key interests and mindset.
+  Analyze the following answers and generate a response in the format specified.
 
   Answers:
   {{#each answers}}

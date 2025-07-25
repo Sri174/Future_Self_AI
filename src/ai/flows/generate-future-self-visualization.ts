@@ -1,5 +1,3 @@
-// Implemented the flow for generating a future self visualization based on user input and image.
-
 'use server';
 
 /**
@@ -12,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import wav from 'wav';
 
 const GenerateFutureSelfVisualizationInputSchema = z.object({
   photoDataUri: z
@@ -22,8 +19,8 @@ const GenerateFutureSelfVisualizationInputSchema = z.object({
     ),
   interests: z
     .string()
-    .describe('A comma separated list of the student\'s interests.'),
-  mindset: z.string().describe('A description of the student\'s mindset.'),
+    .describe(`A comma separated list of the student's interests based on their MCQ answers.`), 
+  mindset: z.string().describe(`A description of the student's mindset.`),
 });
 export type GenerateFutureSelfVisualizationInput = z.infer<
   typeof GenerateFutureSelfVisualizationInputSchema
@@ -33,8 +30,9 @@ const GenerateFutureSelfVisualizationOutputSchema = z.object({
   generatedImage: z
     .string()
     .describe(
-      'The AI-generated image of the student\'s future self, as a data URI.'
+      `The AI-generated image of the student's future self, as a data URI.`
     ),
+  futureSelfDescription: z.string().describe("An inspiring description of the student's future self."),
 });
 export type GenerateFutureSelfVisualizationOutput = z.infer<
   typeof GenerateFutureSelfVisualizationOutputSchema
@@ -46,25 +44,17 @@ export async function generateFutureSelfVisualization(
   return generateFutureSelfVisualizationFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'generateFutureSelfVisualizationPrompt',
+const textGenerationPrompt = ai.definePrompt({
+  name: 'generateFutureSelfDescriptionPrompt',
   input: {schema: GenerateFutureSelfVisualizationInputSchema},
-  output: {schema: GenerateFutureSelfVisualizationOutputSchema},
-  prompt: `You are an AI artist specializing in generating images of people\'s future selves.
-
-You will be provided with a photo of the student, a list of their interests, and a description of their mindset.
-
-Use this information to generate an image of the student\'s future self that reflects their aspirations and potential.
+  output: {schema: z.object({ futureSelfDescription: z.string() })},
+  prompt: `Based on the following interests and mindset, generate a short, inspiring, and dynamic description of what this student's future could look like.
 
 Interests: {{{interests}}}
 Mindset: {{{mindset}}}
-Photo: {{media url=photoDataUri}}
-
-Ensure the generated image is high-quality and visually appealing.
-
-Return the generated image as a data URI.
 `,
 });
+
 
 const generateFutureSelfVisualizationFlow = ai.defineFlow(
   {
@@ -73,13 +63,18 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
     outputSchema: GenerateFutureSelfVisualizationOutputSchema,
   },
   async input => {
-    const {media} = await ai.generate({
+    const textGenPromise = textGenerationPrompt(input);
+
+    const imageGenPromise = ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
       prompt: [
         {media: {url: input.photoDataUri}},
         {
           text:
-            `Generate an image of this person\'s future self, taking into account their interests are ${input.interests} and their mindset is ${input.mindset}`,
+            `Based on a psychometric analysis, this person has the following interests: ${input.interests} and mindset: ${input.mindset}.
+            Generate an accurate and inspiring, high-quality image of this person's future self.
+            Maintain the likeness of the person in the provided photo while incorporating elements that reflect these aspects.
+            The generated image should be realistic and inspiring, suggesting a successful and fulfilling future aligned with their interests and mindset.`,
         },
       ],
       config: {
@@ -87,6 +82,19 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
       },
     });
 
-    return {generatedImage: media!.url!};
+    const [textResult, imageResult] = await Promise.all([textGenPromise, imageGenPromise]);
+    
+    if (!imageResult.media || !imageResult.media.url) {
+      throw new Error("Image generation failed.");
+    }
+
+    if (!textResult.output) {
+        throw new Error("Text generation failed.");
+    }
+
+    return {
+        generatedImage: imageResult.media.url,
+        futureSelfDescription: textResult.output.futureSelfDescription,
+    };
   }
 );
