@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, LoaderCircle, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign }
+import { List, Orbit, BrainCircuit, Wrench, Puzzle, Lightbulb, BookOpen, FlaskConical, Brain, Sparkles, TrendingDown, RefreshCw, MessageSquare, Shield, User, Star, Repeat, Search, ArrowRight, Handshake, PenTool, Globe, Building2, Paintbrush, Rocket, Briefcase, Heart, Scale, DollarSign }
 from 'lucide-react';
 
 const icons: { [key: string]: React.ElementType } = {
@@ -38,7 +38,7 @@ const questions = [
     options: [
       { id: 'a1', text: 'Stays calm and focused', icon: 'Brain' },
       { id: 'a2', text: 'Generates rapid, impulsive ideas', icon: 'Sparkles' },
-      { id: 'a3', text: 'Overanalyzes and hesitates', icon: 'Search' },
+      { id: 'a3', text: 'Overanalyzes and hesitates', icon: 'TrendingDown' },
       { id: 'a4', text: 'Shifts between ideas quickly', icon: 'RefreshCw' },
     ],
   },
@@ -77,7 +77,7 @@ const questions = [
     text: 'Your energy comes from:',
     options: [
       { id: 'a1', text: 'Alone time (recharges you)', icon: 'Brain' },
-      { id: 'a2', text: 'Social interactions (fuels you)', icon: 'Users' },
+      { id: 'a2', text: 'Social interactions (fuels you)', icon: 'User' },
       { id: 'a3', text: 'Achieving goals (motivates you)', icon: 'Star' },
       { id: 'a4', text: 'Creative expression (inspires you)', icon: 'Paintbrush' },
     ],
