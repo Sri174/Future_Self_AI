@@ -24,7 +24,7 @@ const GenerateVideoInputSchema = z.object({
 export type GenerateVideoInput = z.infer<typeof GenerateVideoInputSchema>;
 
 const GenerateVideoOutputSchema = z.object({
-  videoUrl: z.string().describe('The URL of the generated video.'),
+  videoUrl: z.string().describe('The data URI of the generated video.'),
 });
 export type GenerateVideoOutput = z.infer<typeof GenerateVideoOutputSchema>;
 
@@ -65,28 +65,14 @@ export async function generateVideo(
     throw new Error('Failed to generate video: ' + finalOperation.error.message);
   }
 
-  const video = finalOperation.output?.message?.content.find(p => !!p.media);
-  if (!video || !video.media) {
+  const videoPart = finalOperation.output?.message?.content.find(p => !!p.media);
+  if (!videoPart || !videoPart.media) {
     throw new Error('Failed to find the generated video in the operation result');
   }
-
-  // The URL from VEO might be temporary, so we fetch it and convert to a Data URI
-  // to ensure it's accessible on the client.
-  const fetch = (await import('node-fetch')).default;
-  const videoResponse = await fetch(
-    `${video.media.url}&key=${process.env.GEMINI_API_KEY}`
-  );
-  if (!videoResponse.ok || !videoResponse.body) {
-    throw new Error(
-      `Failed to download video: ${videoResponse.statusText}`
-    );
-  }
-  const videoBuffer = await videoResponse.buffer();
-  const videoDataUri = `data:${
-    video.media.contentType || 'video/mp4'
-  };base64,${videoBuffer.toString('base64')}`;
-
+  
+  // The media.url from VEO is already a data URI with base64 encoded video data.
+  // No need to fetch it again.
   return {
-    videoUrl: videoDataUri,
+    videoUrl: videoPart.media.url,
   };
 }
