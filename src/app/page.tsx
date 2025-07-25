@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward } from 'lucide-react';
+import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward, Video } from 'lucide-react';
 import { answerMCQQuestions, AnswerMCQQuestionsInput } from '@/ai/flows/answer-mcq-questions';
 import { generateFutureSelfVisualization } from '@/ai/flows/generate-future-self-visualization';
+import { generateVideo } from '@/ai/flows/generate-video';
 import { useToast } from "@/hooks/use-toast";
 import Header from '@/components/header';
 import Quiz from '@/components/quiz';
@@ -37,8 +38,10 @@ export default function Home() {
   const [mindset, setMindset] = useState('');
   const [userImage, setUserImage] = useState<string | null>(null);
   const [futureImage, setFutureImage] = useState<string | null>(null);
+  const [futureVideo, setFutureVideo] = useState<string | null>(null);
   const [futureSelfDescription, setFutureSelfDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const { toast } = useToast();
@@ -103,6 +106,27 @@ export default function Home() {
     }
   };
 
+  const handleVideoSubmit = async () => {
+    if (!futureImage) return;
+    setIsGeneratingVideo(true);
+    try {
+        const result = await generateVideo({
+            imageDataUri: futureImage,
+            futureSelfDescription: futureSelfDescription
+        });
+        setFutureVideo(result.videoUrl);
+    } catch (error) {
+        console.error(error);
+        toast({
+            title: "Error Generating Video",
+            description: "Could not generate your video. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsGeneratingVideo(false);
+    }
+  }
+
   const handleSkipPhoto = () => {
     setUserImage(null);
     handleImageSubmit();
@@ -116,6 +140,7 @@ export default function Home() {
     setMindset('');
     setUserImage(null);
     setFutureImage(null);
+    setFutureVideo(null);
     setFutureSelfDescription('');
     setProgress(0);
   };
@@ -213,18 +238,35 @@ export default function Home() {
               <CardDescription>Here's a vision of your future self based on your aspirations.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className={`grid grid-cols-1 ${userImage ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-4 items-center`}>
+              <div className="w-full aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
+                {isGeneratingVideo && (
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
+                    <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
+                    <p className="text-white mt-2">Generating video...</p>
+                  </div>
+                )}
+                {futureVideo ? (
+                  <video src={futureVideo} controls autoPlay loop className="w-full h-full object-cover" />
+                ) : futureImage ? (
+                  <Image src={futureImage} alt="Generated future self" layout="fill" className="object-cover" data-ai-hint="futuristic person" />
+                ) : (
+                   <div className="text-muted-foreground">Image not available</div>
+                )}
+              </div>
+              
+              <div className={`grid grid-cols-1 ${userImage ? 'md:grid-cols-2' : 'hidden'} gap-4 items-center`}>
                 {userImage && (
                   <div className="flex flex-col items-center">
                     <h3 className="font-semibold mb-2">Your Photo</h3>
                     <Image src={userImage} alt="User upload" width={300} height={300} className="rounded-lg shadow-md" data-ai-hint="person" />
                   </div>
                 )}
-                <div className={`flex flex-col items-center ${!userImage ? 'col-span-1 md:col-span-1' : ''}`}>
-                  <h3 className="font-semibold mb-2 text-primary">Your Future Self</h3>
+                <div className="flex flex-col items-center">
+                  <h3 className="font-semibold mb-2 text-primary">Your Future Self (Image)</h3>
                   {futureImage && <Image src={futureImage} alt="Generated future self" width={300} height={300} className="rounded-lg shadow-lg border-2 border-primary" data-ai-hint="futuristic person" />}
                 </div>
               </div>
+              
               {futureSelfDescription && (
                 <Card className="mt-4 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-card-foreground">
                   <CardContent className="p-6">
@@ -232,12 +274,15 @@ export default function Home() {
                   </CardContent>
                 </Card>
               )}
-              <div className="flex justify-center gap-4 pt-4">
+              <div className="flex justify-center gap-4 pt-4 flex-wrap">
                 <Button variant="outline" onClick={resetApp}>
                   <Repeat className="mr-2" /> Start Over
                 </Button>
-                <Button onClick={downloadImage}>
-                  <Download className="mr-2" /> Download Vision
+                <Button onClick={downloadImage} disabled={!futureImage}>
+                  <Download className="mr-2" /> Download Image
+                </Button>
+                <Button onClick={handleVideoSubmit} disabled={isGeneratingVideo || !futureImage}>
+                  {isGeneratingVideo ? <><LoaderCircle className="animate-spin mr-2" /> Working on it...</> : <><Video className="mr-2" /> See in Action</>}
                 </Button>
               </div>
             </CardContent>

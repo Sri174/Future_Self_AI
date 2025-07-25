@@ -73,6 +73,7 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
         text: `Critically analyze the provided photo. Your primary goal is to maintain the exact likeness, facial features, and ethnicity of the person in the photo. 
         Based on a psychometric analysis, this person has the following interests: ${input.interests} and mindset: ${input.mindset}.
         Generate a new, inspiring, high-quality, photorealistic image of this person's future self, matching the profession based on the analysis. 
+        The generated image must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer).
         It is crucial that the generated person is clearly identifiable as the person from the photo. 
         The theme of the image, including the background and attire, should reflect their interests and mindset. 
         The final image should be realistic and inspiring, suggesting a successful and fulfilling future career.`,
@@ -81,7 +82,7 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
         imageGenPromptParts.push({
             text: `Based on a psychometric analysis, a person has the following interests: ${input.interests} and mindset: ${input.mindset}. 
             Generate an inspiring, high-quality, photorealistic image of this person's future self, matching a profession based on the analysis.
-            The image should be a full-body or upper-body shot, not just legs or abstract elements.
+            The image should be a full-body or upper-body shot, not just legs or abstract elements, and it must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer).
             The theme of the image, including the background and attire, should reflect their interests and mindset. 
             The final image should be realistic and inspiring, suggesting a successful and fulfilling future. Do not show the person's face.`,
         });
