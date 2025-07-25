@@ -16,18 +16,17 @@ import Image from 'next/image';
 
 type Step = 'intro' | 'quiz' | 'summary' | 'upload' | 'generating' | 'result';
 
-// This data is needed to correctly format the input for the `answerMCQQuestions` flow.
 const quizQuestions = [
-  { id: 'q1', text: 'What excites you the most?' },
-  { id: 'q2', text: 'Pick a dream activity:' },
-  { id: 'q3', text: 'You prefer to...' },
-  { id: 'q4', text: 'Pick a superpower:' },
-  { id: 'q5', text: 'If you could live in any time...' },
-  { id: 'q6', text: 'Pick your favorite school subject:' },
-  { id: 'q7', text: 'Your ideal weekend involves:' },
-  { id: 'q8', text: 'How do you make decisions?' },
-  { id: 'q9', text: `When you grow up, you'd love to…` },
-  { id: 'q10', text: 'Pick one word that describes you:' },
+  { id: 'q1', text: 'Which of the following activities do you enjoy the most?' },
+  { id: 'q2', text: 'What kind of project would excite you the most?' },
+  { id: 'q3', text: 'How do you handle failure or mistakes?' },
+  { id: 'q4', text: 'In a group project, what role do you naturally take?' },
+  { id: 'q5', text: 'If your friend is feeling sad or anxious, what would you do?' },
+  { id: 'q6', text: 'When faced with a new or difficult challenge, how do you feel?' },
+  { id: 'q7', text: 'What motivates you to work hard or do well? (Choose one)' },
+  { id: 'q8', text: 'What kind of future do you imagine for yourself?' },
+  { id: 'q9', text: 'When learning something new, which method do you prefer?' },
+  { id: 'q10', text: 'How do you usually make decisions?' },
 ];
 
 export default function Home() {

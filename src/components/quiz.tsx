@@ -1,121 +1,129 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, LoaderCircle, ArrowRight, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle}
+import { Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, LoaderCircle, ArrowRight, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle, Megaphone, Group, Trophy, DollarSign, PenTool, Video, Search}
 from 'lucide-react';
 
 const icons: { [key: string]: React.ElementType } = {
-  Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle
+  Cpu, TreePine, Building2, Paintbrush, BookOpen, Users, Lightbulb, TrendingUp, Code, HeartHandshake, Leaf, Music, Wrench, BrainCircuit, MessageSquare, User, Crown, Rocket, Shield, Star, Sparkles, FlaskConical, PawPrint, Clapperboard, Dumbbell, GraduationCap, Palette, Book, Calculator, Users2, Tent, Headset, Puzzle, Mountain, Handshake, Brain, Heart, Scale, Dice5, Orbit, LightbulbIcon, Mic, UtensilsCrossed, Sword, Sparkle, Megaphone, Group, Trophy, DollarSign, PenTool, Video, Search
 };
 
 const questions = [
   {
     id: 'q1',
-    text: 'What excites you the most?',
+    text: 'Which of the following activities do you enjoy the most?',
     options: [
-      { id: 'a1', text: 'Exploring new worlds', icon: 'Orbit' },
-      { id: 'a2', text: 'Solving puzzles', icon: 'Puzzle' },
-      { id: 'a3', text: 'Creating new things', icon: 'Sparkle' },
-      { id: 'a4', text: 'Talking to people', icon: 'MessageSquare' },
-      { id: 'a5', text: 'Cooking and experimenting', icon: 'UtensilsCrossed' },
+      { id: 'a1', text: 'Doing science experiments', icon: 'FlaskConical' },
+      { id: 'a2', text: 'Drawing or painting', icon: 'Paintbrush' },
+      { id: 'a3', text: 'Solving puzzles or coding', icon: 'Puzzle' },
+      { id: 'a4', text: 'Speaking in front of others', icon: 'Megaphone' },
+      { id: 'a5', text: 'Reading and researching', icon: 'BookOpen' },
+      { id: 'a6', text: 'Building or fixing things', icon: 'Wrench' },
     ],
   },
   {
     id: 'q2',
-    text: 'Pick a dream activity:',
+    text: 'What kind of project would excite you the most?',
     options: [
-      { id: 'a1', text: 'Fly a spaceship', icon: 'Rocket' },
-      { id: 'a2', text: 'Build a robot', icon: 'Wrench' },
-      { id: 'a3', text: 'Care for animals', icon: 'PawPrint' },
-      { id: 'a4', text: 'Direct a movie', icon: 'Clapperboard' },
-      { id: 'a5', text: 'Train like an athlete', icon: 'Dumbbell' },
+      { id: 'a1', text: 'Creating a robot', icon: 'Cpu' },
+      { id: 'a2', text: 'Designing an art exhibition', icon: 'Palette' },
+      { id: 'a3', text: 'Writing a research paper', icon: 'PenTool' },
+      { id: 'a4', text: 'Organizing a community event', icon: 'Group' },
+      { id: 'a5', text: 'Developing an app', icon: 'Code' },
+      { id: 'a6', text: 'Starting a YouTube channel', icon: 'Video' },
     ],
   },
   {
     id: 'q3',
-    text: 'You prefer to...',
+    text: 'How do you handle failure or mistakes?',
     options: [
-      { id: 'a1', text: 'Work alone', icon: 'User' },
-      { id: 'a2', text: 'Work with people', icon: 'Users2' },
-      { id: 'a3', text: 'Work with machines/tools', icon: 'Wrench' },
-      { id: 'a4', text: 'Work with nature', icon: 'Leaf' },
+      { id: 'a1', text: 'See them as a chance to learn', icon: 'Lightbulb' },
+      { id: 'a2', text: 'Feel discouraged', icon: 'TrendingUp' }, //trending down is not available
+      { id: 'a3', text: 'Understand and fix it', icon: 'Wrench' },
+      { id: 'a4', text: 'Blame others', icon: 'Users' },
     ],
   },
   {
     id: 'q4',
-    text: 'Pick a superpower:',
+    text: 'In a group project, what role do you naturally take?',
     options: [
-      { id: 'a1', text: 'Super-intelligence', icon: 'BrainCircuit' },
-      { id: 'a2', text: 'Build anything', icon: 'Wrench' },
-      { id: 'a3', text: 'Make people laugh', icon: 'MessageSquare' },
-      { id: 'a4', text: 'Speak every language', icon: 'MessageSquare' }, // Using MessageSquare for language too
-      { id: 'a5', text: 'Heal others', icon: 'HeartHandshake' },
+      { id: 'a1', text: 'Idea Generator', icon: 'Lightbulb' },
+      { id: 'a2', text: 'Planner & Organizer', icon: 'Book' },
+      { id: 'a3', text: 'Team Motivator', icon: 'HeartHandshake' },
+      { id: 'a4', text: 'Designer/Creative', icon: 'Palette' },
+      { id: 'a5', text: 'Researcher/Data Analyst', icon: 'Search' },
+      { id: 'a6', text: 'Hands-on Executor', icon: 'Wrench' },
     ],
   },
   {
     id: 'q5',
-    text: 'If you could live in any time...',
+    text: 'If your friend is feeling sad or anxious, what would you do?',
     options: [
-      { id: 'a1', text: 'The past', icon: 'Book' },
-      { id: 'a2', text: 'The present', icon: 'Tent' },
-      { id: 'a3', text: 'The future', icon: 'Rocket' },
+      { id: 'a1', text: 'Give advice or solutions', icon: 'BrainCircuit' },
+      { id: 'a2', text: 'Stay with them and listen', icon: 'Headset' },
+      { id: 'a3', text: 'Try to cheer them up', icon: 'Sparkles' },
+      { id: 'a4', text: 'Leave them alone', icon: 'User' },
+      { id: 'a5', text: 'Talk to an adult for help', icon: 'MessageSquare' },
     ],
   },
   {
     id: 'q6',
-    text: 'Pick your favorite school subject:',
+    text: 'When faced with a new or difficult challenge, how do you feel?',
     options: [
-      { id: 'a1', text: 'Science', icon: 'FlaskConical' },
-      { id: 'a2', text: 'Art', icon: 'Palette' },
-      { id: 'a3', text: 'Literature', icon: 'BookOpen' },
-      { id: 'a4', text: 'Math', icon: 'Calculator' },
-      { id: 'a5', text: 'Sports', icon: 'Dumbbell' },
+      { id: 'a1', text: 'Excited and ready to explore', icon: 'Rocket' },
+      { id: 'a2', text: 'Curious but slightly nervous', icon: 'Brain' },
+      { id: 'a3', text: 'Stressed and hesitant', icon: 'Shield' }, // as in defensive
+      { id: 'a4', text: 'Confident and determined', icon: 'Crown' },
+      { id: 'a5', text: 'Prefer to avoid it', icon: 'Shield' },
     ],
   },
   {
     id: 'q7',
-    text: 'Your ideal weekend involves:',
+    text: 'What motivates you to work hard or do well? (Choose one)',
     options: [
-      { id: 'a1', text: 'Adventure', icon: 'Mountain' },
-      { id: 'a2', text: 'Music or videos', icon: 'Headset' },
-      { id: 'a3', text: 'Puzzles or games', icon: 'Puzzle' },
-      { id: 'a4', text: 'Nature walks', icon: 'Leaf' },
-      { id: 'a5', text: 'Helping family or friends', icon: 'Handshake' },
+      { id: 'a1', text: 'Recognition or praise', icon: 'Trophy' },
+      { id: 'a2', text: 'Personal growth', icon: 'TrendingUp' },
+      { id: 'a3', text: 'Earning potential', icon: 'DollarSign' },
+      { id: 'a4', text: 'Helping others', icon: 'HeartHandshake' },
+      { id: 'a5', text: 'Achieving a big idea', icon: 'Lightbulb' },
+      { id: 'a6', text: 'Solving complex problems', icon: 'Puzzle' },
     ],
   },
   {
     id: 'q8',
-    text: 'How do you make decisions?',
+    text: 'What kind of future do you imagine for yourself?',
     options: [
-      { id: 'a1', text: 'I think deeply', icon: 'BrainCircuit' },
-      { id: 'a2', text: 'I follow my heart', icon: 'Heart' },
-      { id: 'a3', text: 'I weigh the pros & cons', icon: 'Scale' },
-      { id: 'a4', text: 'I go with the flow', icon: 'Dice5' },
+      { id: 'a1', text: 'Scientist, Engineer, Doctor', icon: 'FlaskConical' },
+      { id: 'a2', text: 'Designer, Artist, Animator', icon: 'Palette' },
+      { id: 'a3', text: 'Teacher, Coach, Counselor', icon: 'BookOpen' },
+      { id: 'a4', text: 'Entrepreneur, Leader, Influencer', icon: 'Megaphone' },
+      { id: 'a5', text: 'Software Developer, AI Engineer', icon: 'Code' },
+      { id: 'a6', text: 'Environmentalist, Researcher', icon: 'Leaf' },
     ],
   },
   {
     id: 'q9',
-    text: `When you grow up, you'd love to…`,
+    text: 'When learning something new, which method do you prefer?',
     options: [
-      { id: 'a1', text: 'Explore space', icon: 'Orbit' },
-      { id: 'a2', text: 'Invent new tech', icon: 'Wrench' },
-      { id: 'a3', text: 'Inspire crowds', icon: 'Mic' },
-      { id: 'a4', text: 'Open a cafe', icon: 'UtensilsCrossed' },
-      { id: 'a5', text: 'Save the world', icon: 'Sword' },
+      { id: 'a1', text: 'Watching videos or animations', icon: 'Video' },
+      { id: 'a2', text: 'Reading step-by-step guides', icon: 'Book' },
+      { id: 'a3', text: 'Doing it myself hands-on', icon: 'Wrench' },
+      { id: 'a4', text: 'Explaining it to others', icon: 'MessageSquare' },
+      { id: 'a5', text: 'Visual mind-mapping', icon: 'BrainCircuit' },
     ],
   },
   {
     id: 'q10',
-    text: 'Pick one word that describes you:',
+    text: 'How do you usually make decisions?',
     options: [
-      { id: 'a1', text: 'Curious', icon: 'Sparkles' },
-      { id: 'a2', text: 'Brave', icon: 'Shield' },
-      { id: 'a3', text: 'Creative', icon: 'Palette' },
-      { id: 'a4', text: 'Calm', icon: 'TreePine' },
-      { id: 'a5', text: 'Fun', icon: 'MessageSquare' }, // Using MessageSquare for fun too
+      { id: 'a1', text: 'Based on facts and data', icon: 'Calculator' },
+      { id: 'a2', text: 'Based on how I feel', icon: 'Heart' },
+      { id: 'a3', text: 'By asking others', icon: 'Users' },
+      { id: 'a4', text: 'After thinking of long-term effects', icon: 'Orbit' },
+      { id: 'a5', text: 'On the spot without much thinking', icon: 'Dice5' },
     ],
   },
 ];
@@ -166,7 +174,7 @@ const Quiz: React.FC<QuizProps> = ({ onSubmit, onProgressUpdate, isLoading }) =>
           <CardDescription>Question {currentQuestionIndex + 1} of {questions.length}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {currentQuestion.options.map((option) => {
               const Icon = icons[option.icon];
               const isSelected = answers[currentQuestion.id] === option.text;
