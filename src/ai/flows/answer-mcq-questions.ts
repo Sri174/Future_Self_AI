@@ -22,6 +22,7 @@ const AnswerMCQQuestionsOutputSchema = z.object({
   interests: z.string().describe("A summary of the student's key interests based on their answers."),
   mindset: z.string().describe("A summary of the student's mindset based on their answers."),
   summary: z.string().describe('A summary of the student\'s interests and mindset based on their answers.'),
+  suggestedProfession: z.string().describe("A suggested profession for the student based on their answers."),
 });
 export type AnswerMCQQuestionsOutput = z.infer<typeof AnswerMCQQuestionsOutputSchema>;
 
@@ -36,9 +37,10 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert psychometric analyst AI. Your task is to analyze a user's answers from a questionnaire to create a detailed personality and career profile.
 
 Based on the answers provided, generate:
-1.  **Interests**: A concise summary of the user's key interests and passions. Identify primary themes like Technology, Arts, Humanitarianism, or Logic/Problem-Solving. This should also include a suggested profession.
+1.  **Interests**: A concise summary of the user's key interests and passions. Identify primary themes like Technology, Arts, Humanitarianism, or Logic/Problem-Solving.
 2.  **Mindset**: A description of the user's mindset (e.g., Growth, Fixed, Adaptable, Reflective) based on their responses to challenges, failure, and learning.
 3.  **Summary**: A holistic summary combining their interests and mindset into a compelling narrative about their potential and work style.
+4.  **Suggested Profession**: Based on the interests and mindset, suggest a single, specific profession (e.g., 'Landscape Architect', 'Marine Biologist', 'Software Developer'). This field is required and you MUST provide a profession.
 
 Analyze the following answers:
 {{#each answers}}
