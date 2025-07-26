@@ -35,7 +35,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert psychometric analyst AI. Your task is to analyze a user's answers from a multiple-choice questionnaire to create a detailed personality and career profile.
 
 Based on the answers provided, generate:
-1.  **Interests**: A concise summary of the user's key interests and passions. Identify primary themes like Technology, Arts, Humanitarianism, or Logic/Problem-Solving.
+1.  **Interests**: A concise summary of the user's key interests and passions. Identify primary themes like Technology, Arts, Humanitarianism, or Logic/Problem-Solving. This should also include a suggested profession.
 2.  **Mindset**: A description of the user's mindset (e.g., Growth, Fixed, Adaptable, Reflective) based on their responses to challenges, failure, and learning.
 3.  **Summary**: A holistic summary combining their interests and mindset into a compelling narrative about their potential and work style.
 

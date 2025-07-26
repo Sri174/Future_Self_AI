@@ -72,14 +72,14 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
       imageGenPromptParts.push({
         text: `Analyze the provided photo meticulously. Your primary goal is to preserve the person's distinct facial features, likeness, and ethnicity. Based on a detailed psychometric analysis, this individual shows strong interest in '${input.interests}' and possesses a '${input.mindset}' mindset.
         Generate a new, inspiring, high-fidelity, and photorealistic image that vividly portrays this person's future self in a professional context. This image must clearly represent a profession suggested by their interests.
-        Incorporate tangible elements of this profession—such as the environment, attire, and tools (e.g., a modern computer setup for a developer, a sterile lab for a scientist, or a creative studio for an artist).
+        Incorporate tangible elements of this profession—such as the environment, attire, and tools.
         Crucially, the generated person must be clearly and unmistakably identifiable as the person in the original photo. The background and attire should not only reflect the profession but also subtly echo their creative and determined mindset. The final image should be a professional, candid-style photograph that suggests a successful, fulfilling, and dynamic future career.`,
       });
     } else {
         imageGenPromptParts.push({
             text: `Based on a psychometric analysis, a person has interests in '${input.interests}' and a '${input.mindset}' mindset.
             Generate an inspiring, high-quality, and photorealistic image of this person's future self. This image must clearly represent a profession suggested by their interests.
-            The image should be a full-body or upper-body shot, not just abstract elements, and must clearly represent the profession through the environment, attire, and objects (e.g., a computer for a developer, a sterile lab for a scientist, or a creative studio for an artist).
+            The image should be a full-body or upper-body shot, not just abstract elements, and must clearly represent the profession through the environment, attire, and objects.
             The theme of the image, including the background and attire, should reflect their interests and mindset. 
             The final image should be realistic and inspiring, with a professional and candid style, suggesting a successful and fulfilling future. Do not show the person's face.`,
         });
