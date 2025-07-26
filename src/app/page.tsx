@@ -9,7 +9,7 @@ import { generateFutureSelfVisualization } from '@/ai/flows/generate-future-self
 import { generateVideoFromImage } from '@/ai/flows/generate-video-from-image';
 import { useToast } from "@/hooks/use-toast";
 import Header from '@/components/header';
-import Quiz, { questions } from '@/components/quiz';
+import Quiz from '@/components/quiz';
 import ImageUploader from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -39,17 +39,9 @@ export default function Home() {
   const handleQuizSubmit = async (answers: Record<string, string>) => {
     setIsLoading(true);
     setQuizAnswers(answers);
-
-    const formattedAnswers: AnswerMCQQuestionsInput['answers'] = {};
-    for (const qId in answers) {
-      const question = questions.find(q => q.id === qId);
-      if (question) {
-        formattedAnswers[question.text] = answers[qId];
-      }
-    }
     
     const input: AnswerMCQQuestionsInput = {
-      answers: formattedAnswers
+      answers: answers
     };
 
     try {

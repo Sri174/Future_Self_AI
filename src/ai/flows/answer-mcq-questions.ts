@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -13,7 +14,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const AnswerMCQQuestionsInputSchema = z.object({
-  answers: z.record(z.string(), z.string()).describe('A map of question IDs to answer IDs.'),
+  answers: z.record(z.string(), z.string()).describe('A map of question texts to answer texts.'),
 });
 export type AnswerMCQQuestionsInput = z.infer<typeof AnswerMCQQuestionsInputSchema>;
 
@@ -32,7 +33,7 @@ const prompt = ai.definePrompt({
   name: 'answerMCQQuestionsPrompt',
   input: {schema: AnswerMCQQuestionsInputSchema},
   output: {schema: AnswerMCQQuestionsOutputSchema},
-  prompt: `You are an expert psychometric analyst AI. Your task is to analyze a user's answers from a multiple-choice questionnaire to create a detailed personality and career profile.
+  prompt: `You are an expert psychometric analyst AI. Your task is to analyze a user's answers from a questionnaire to create a detailed personality and career profile.
 
 Based on the answers provided, generate:
 1.  **Interests**: A concise summary of the user's key interests and passions. Identify primary themes like Technology, Arts, Humanitarianism, or Logic/Problem-Solving. This should also include a suggested profession.
