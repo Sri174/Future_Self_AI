@@ -22,6 +22,7 @@ const GenerateFutureSelfVisualizationInputSchema = z.object({
     .string()
     .describe(`A comma separated list of the student's interests based on their MCQ answers.`),
   mindset: z.string().describe(`A description of the student's mindset.`),
+  suggestedProfession: z.string().describe("The AI-suggested profession for the student."),
 });
 export type GenerateFutureSelfVisualizationInput = z.infer<
   typeof GenerateFutureSelfVisualizationInputSchema
@@ -49,10 +50,11 @@ const textGenerationPrompt = ai.definePrompt({
   name: 'generateFutureSelfDescriptionPrompt',
   input: {schema: GenerateFutureSelfVisualizationInputSchema},
   output: {schema: z.object({ futureSelfDescription: z.string() })},
-  prompt: `Based on the following interests and mindset, generate a short, inspiring, and dynamic description of what this student's future could look like.
+  prompt: `Based on the following interests, mindset, and suggested profession, generate a short, inspiring, and dynamic description of what this student's future could look like.
 
 Interests: {{{interests}}}
 Mindset: {{{mindset}}}
+Suggested Profession: {{{suggestedProfession}}}
 `,
 });
 
@@ -70,18 +72,36 @@ const generateFutureSelfVisualizationFlow = ai.defineFlow(
     if (input.photoDataUri) {
       imageGenPromptParts.push({ media: { url: input.photoDataUri } });
       imageGenPromptParts.push({
-        text: `Analyze the provided photo meticulously. Your primary goal is to preserve the person's distinct facial features, likeness, and ethnicity. Based on a detailed psychometric analysis, this individual shows strong interest in '${input.interests}' and possesses a '${input.mindset}' mindset.
-        Generate a new, inspiring, high-fidelity, and photorealistic image that vividly portrays this person's future self in a professional context. This image must clearly represent a profession suggested by their interests.
-        Incorporate tangible elements of this profession—such as the environment, attire, and tools.
-        Crucially, the generated person must be clearly and unmistakably identifiable as the person in the original photo. The background and attire should not only reflect the profession but also subtly echo their creative and determined mindset. The final image should be a professional, candid-style photograph that suggests a successful, fulfilling, and dynamic future career.`,
+        text: `You are an expert AI image generator. Your task is to create a photorealistic, inspiring, and highly-detailed image of a person's future self based on a psychometric analysis and a suggested profession.
+
+        **Analysis Results:**
+        - **Interests:** ${input.interests}
+        - **Mindset:** ${input.mindset}
+        - **Suggested Profession:** ${input.suggestedProfession}
+
+        **Instructions:**
+        1.  **Analyze the User's Photo:** Meticulously preserve the person's distinct facial features, likeness, ethnicity, and estimated age. The generated person MUST be clearly and unmistakably identifiable as the person in the original photo.
+        2.  **Create the Scene:** Generate a high-fidelity image that vividly portrays the person in the context of their **Suggested Profession: ${input.suggestedProfession}**.
+        3.  **Environment and Attire:** The environment, attire, and any tools or objects present MUST be specific and authentic to this profession. For example, if the profession is 'Landscape Architect', show them outdoors with design plans, not in an office with a computer. If the profession is 'Marine Biologist', show them on a research vessel or underwater. AVOID generic office settings with computers unless the profession is explicitly 'Software Developer' or similar.
+        4.  **Reflect the Mindset:** The overall mood and style of the image should reflect their mindset (${input.mindset}). For example, a 'Creative' mindset could have a more artistic and dynamic composition. A 'Calm' mindset could be reflected in a serene environment.
+        5.  **Final Image Style:** The final image must be a professional, candid-style photograph that looks realistic and inspiring, suggesting a successful and fulfilling future career.`,
       });
     } else {
         imageGenPromptParts.push({
-            text: `Based on a psychometric analysis, a person has interests in '${input.interests}' and a '${input.mindset}' mindset.
-            Generate an inspiring, high-quality, and photorealistic image of this person's future self. This image must clearly represent a profession suggested by their interests.
-            The image should be a full-body or upper-body shot, not just abstract elements, and must clearly represent the profession through the environment, attire, and objects.
-            The theme of the image, including the background and attire, should reflect their interests and mindset. 
-            The final image should be realistic and inspiring, with a professional and candid style, suggesting a successful and fulfilling future. Do not show the person's face.`,
+            text: `You are an expert AI image generator. Your task is to create a photorealistic, inspiring, and highly-detailed image of a person's future self based on a psychometric analysis.
+
+            **Analysis Results:**
+            - **Interests:** ${input.interests}
+            - **Mindset:** ${input.mindset}
+            - **Suggested Profession:** ${input.suggestedProfession}
+
+            **Instructions:**
+            1.  **Create the Scene:** Generate a high-fidelity image that vividly portrays a person in the context of their **Suggested Profession: ${input.suggestedProfession}**.
+            2.  **Anonymity:** **DO NOT show the person's face.** The image should be from the back, or otherwise conceal their facial identity.
+            3.  **Environment and Attire:** The environment, attire, and any tools or objects present MUST be specific and authentic to this profession. For example, if the profession is 'Landscape Architect', show them outdoors with design plans, not in an office with a computer. If the profession is 'Marine Biologist', show them on a research vessel or underwater. AVOID generic office settings with computers unless the profession is explicitly 'Software Developer' or similar.
+            4.  **Representation:** The image should be a full-body or upper-body shot, not just abstract elements.
+            5.  **Reflect the Mindset:** The overall mood and style of the image should reflect their mindset (${input.mindset}).
+            6.  **Final Image Style:** The final image must be realistic and inspiring, with a professional and candid style, suggesting a successful and fulfilling future career.`,
         });
     }
 
