@@ -9,7 +9,7 @@ import { generateFutureSelfVisualization } from '@/ai/flows/generate-future-self
 import { generateVideoFromImage } from '@/ai/flows/generate-video-from-image';
 import { useToast } from "@/hooks/use-toast";
 import Header from '@/components/header';
-import Quiz from '@/components/quiz';
+import Quiz, { questions } from '@/components/quiz';
 import ImageUploader from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -25,6 +25,7 @@ export default function Home() {
   const [profileSummary, setProfileSummary] = useState('');
   const [interests, setInterests] = useState('');
   const [mindset, setMindset] = useState('');
+  const [suggestedProfession, setSuggestedProfession] = useState('');
   const [userImage, setUserImage] = useState<string | null>(null);
   const [futureImage, setFutureImage] = useState<string | null>(null);
   const [futureVideo, setFutureVideo] = useState<string | null>(null);
@@ -40,15 +41,20 @@ export default function Home() {
     setIsLoading(true);
     setQuizAnswers(answers);
     
-    const input: AnswerMCQQuestionsInput = {
-      answers: answers
-    };
+    const formattedAnswers: AnswerMCQQuestionsInput['answers'] = {};
+    for (const qId in answers) {
+      const question = questions.find(q => q.id === qId);
+      if (question) {
+        formattedAnswers[question.text] = answers[qId];
+      }
+    }
 
     try {
-      const result = await answerMCQQuestions(input);
+      const result = await answerMCQQuestions({ answers: formattedAnswers });
       setProfileSummary(result.summary);
       setInterests(result.interests);
       setMindset(result.mindset);
+      setSuggestedProfession(result.summary); // summary contains the profession
       setStep('summary');
     } catch (error) {
       console.error(error);
@@ -70,6 +76,7 @@ export default function Home() {
         photoDataUri: userImage,
         interests: interests,
         mindset: mindset,
+        suggestedProfession: suggestedProfession,
       });
       setFutureImage(result.generatedImage);
       setFutureSelfDescription(result.futureSelfDescription);
