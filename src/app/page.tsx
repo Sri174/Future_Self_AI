@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward, Video, Save } from 'lucide-react';
 import { answerMCQQuestions, AnswerMCQQuestionsInput } from '@/ai/flows/answer-mcq-questions';
 import { generateFutureSelfVisualization } from '@/ai/flows/generate-future-self-visualization';
-import { generateVideoFromImage } from '@/ai/flows/generate-video-from-image';
 import { useToast } from "@/hooks/use-toast";
 import Header from '@/components/header';
 import Quiz, { questions } from '@/components/quiz';
@@ -14,7 +13,6 @@ import ImageUploader from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import Image from 'next/image';
 
 type Step = 'intro' | 'quiz' | 'summary' | 'upload' | 'generating' | 'result';
@@ -28,12 +26,9 @@ export default function Home() {
   const [suggestedProfession, setSuggestedProfession] = useState('');
   const [userImage, setUserImage] = useState<string | null>(null);
   const [futureImage, setFutureImage] = useState<string | null>(null);
-  const [futureVideo, setFutureVideo] = useState<string | null>(null);
   const [futureSelfDescription, setFutureSelfDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const { toast } = useToast();
 
@@ -54,7 +49,7 @@ export default function Home() {
       setProfileSummary(result.summary);
       setInterests(result.interests);
       setMindset(result.mindset);
-      setSuggestedProfession(result.summary); // summary contains the profession
+      setSuggestedProfession(result.suggestedProfession);
       setStep('summary');
     } catch (error) {
       console.error(error);
@@ -94,25 +89,6 @@ export default function Home() {
     }
   };
 
-  const handleVideoGeneration = async () => {
-    if (!futureImage) return;
-    setIsGeneratingVideo(true);
-    try {
-        const result = await generateVideoFromImage({ imageDataUri: futureImage });
-        setFutureVideo(result.video);
-        setShowVideoModal(true);
-    } catch (error) {
-        console.error("Video generation error:", error);
-        toast({
-            title: "Error Generating Video",
-            description: "Could not bring your image to life. Please try again.",
-            variant: "destructive",
-        });
-    } finally {
-        setIsGeneratingVideo(false);
-    }
-  };
-
   const handleSkipPhoto = () => {
     setUserImage(null);
     handleImageSubmit();
@@ -126,7 +102,6 @@ export default function Home() {
     setMindset('');
     setUserImage(null);
     setFutureImage(null);
-    setFutureVideo(null);
     setFutureSelfDescription('');
     setProgress(0);
   };
@@ -136,17 +111,6 @@ export default function Home() {
       const link = document.createElement('a');
       link.href = futureImage;
       link.download = 'future-self.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-  
-  const downloadVideo = () => {
-    if (futureVideo) {
-      const link = document.createElement('a');
-      link.href = futureVideo;
-      link.download = 'future-self.mp4';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -257,12 +221,6 @@ export default function Home() {
                 <Button onClick={downloadImage} disabled={!futureImage}>
                   <Download className="mr-2" /> Download Image
                 </Button>
-                 <Button onClick={handleVideoGeneration} disabled={!futureImage || isGeneratingVideo}>
-                  {isGeneratingVideo ? <><LoaderCircle className="animate-spin mr-2" />Generating Video...</> : <><Video className="mr-2" /> See in Action</>}
-                </Button>
-                <Button onClick={downloadVideo} disabled={!futureVideo}>
-                  <Save className="mr-2" /> Save to Gallery
-                </Button>
               </div>
             </CardContent>
           </motion.div>
@@ -289,29 +247,6 @@ export default function Home() {
           </AnimatePresence>
         </Card>
       </main>
-      
-      <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Your Future in Motion</DialogTitle>
-            <DialogDescription>
-              Here is a short video of your future self.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="aspect-video relative">
-            {futureVideo ? (
-              <video src={futureVideo} controls autoPlay loop className="w-full rounded-lg" />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
-              </div>
-            )}
-          </div>
-          <DialogClose asChild>
-             <Button variant="outline">Close</Button>
-          </DialogClose>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
