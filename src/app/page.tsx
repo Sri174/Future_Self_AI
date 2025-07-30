@@ -390,8 +390,11 @@ export default function Home() {
                 transition={{ delay: 0.4 }}
               >
                 <CardTitle className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
-                  FutureSelf AI
-                </CardTitle>
+                  MVAFutureSelf AI
+                   <CardTitle className="text-2xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">  
+                   Powered by Skill Satron Tecnologies Pvt.Ltd
+                   </CardTitle>
+                 </CardTitle>
                 <CardDescription className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                   Discover your potential through AI-powered insights. Answer personalized questions and visualize your future self in your dream career.
                 </CardDescription>
