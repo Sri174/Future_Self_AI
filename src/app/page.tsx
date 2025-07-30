@@ -391,7 +391,7 @@ export default function Home() {
               >
                 <CardTitle className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
                   MVAFutureSelf
-                   <CardTitle className="text-4xl md:text-1xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">  
+                   <CardTitle className="text-2xl md:text-1xl font-semibold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">  
                     Powered by Skill Satron Tecnologies Pvt.Ltd
                    </CardTitle>
                  </CardTitle>
