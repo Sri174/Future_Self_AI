@@ -22,8 +22,7 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   serverExternalPackages: ['genkit'],
-  // Optimize for Netlify deployment
-  output: 'standalone',
+  // For Netlify deployment with functions, we don't want static export
   trailingSlash: true,
   // Add these for better chunk loading
   experimental: {
