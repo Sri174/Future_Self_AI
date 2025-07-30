@@ -3,8 +3,8 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward, Video, Save, Stars, Zap, Brain, Target, Camera, Calendar } from 'lucide-react';
-import { answerMCQQuestions, generateFutureSelfVisualization, handleApiError, MCQAnswers } from '@/lib/api';
+import { ArrowRight, Sparkles, User, Image as ImageIcon, Repeat, Download, LoaderCircle, SkipForward, Stars, Zap, Brain, Target, Camera } from 'lucide-react';
+import { answerMCQQuestions, generateFutureSelfVisualization, MCQAnswers } from '@/lib/api';
 import { useToast } from "@/hooks/use-toast";
 import Header from '@/components/header';
 import Quiz, { questions } from '@/components/quiz';
@@ -18,9 +18,8 @@ type Step = 'intro' | 'age' | 'gender' | 'quiz' | 'simple-form' | 'camera' | 'su
 export default function Home() {
   const [step, setStep] = useState<Step>('intro');
   const [ageGroup, setAgeGroup] = useState<'5-10' | '11-17' | undefined>(undefined);
-  const [userAge, setUserAge] = useState<number | undefined>(undefined);
   const [gender, setGender] = useState<'male' | 'female' | undefined>(undefined);
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
+
   const [profileSummary, setProfileSummary] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [mindset, setMindset] = useState('');
@@ -55,7 +54,6 @@ export default function Home() {
 
   const handleQuizSubmit = async (answers: Record<string, string>) => {
     setIsLoading(true);
-    setQuizAnswers(answers);
     
     const formattedAnswers: MCQAnswers = {};
     for (const qId in answers) {
@@ -100,8 +98,7 @@ export default function Home() {
         interests: interests.join(', '),
         mindset: mindset,
         suggestedProfession: suggestedProfession,
-        gender: gender ?? null,
-        userAge: userAge
+        gender: gender ?? null
       });
 
       setFutureImage(result.generatedImage);
@@ -126,12 +123,18 @@ export default function Home() {
     handleImageSubmit();
   };
 
-  // Handler for camera capture (5-10 age group)
+  // Handler for camera capture (both age groups)
   const handleCameraCapture = (dataUri: string | null) => {
     if (dataUri) {
       setUserImage(dataUri);
       setStep('generating');
-      handleSimpleImageGeneration(dataUri);
+
+      // Use appropriate generation function based on age group
+      if (ageGroup === '5-10') {
+        handleSimpleImageGeneration(dataUri);
+      } else {
+        handleImageSubmit();
+      }
     }
   };
 
@@ -145,8 +148,7 @@ export default function Home() {
         interests: dreamProfession,
         mindset: `A young student who dreams of becoming a ${dreamProfession}`,
         suggestedProfession: dreamProfession,
-        gender: gender ?? null,
-        userAge: userAge
+        gender: gender ?? null
       });
 
       setFutureImage(result.generatedImage);
@@ -175,7 +177,6 @@ export default function Home() {
     setStep('intro');
     setAgeGroup(undefined);
     setGender(undefined);
-    setQuizAnswers({});
     setProfileSummary('');
     setInterests([]);
     setMindset('');
@@ -190,11 +191,6 @@ export default function Home() {
     setDreamProfession('');
   };
 
-  const seeInAction = () => {
-    // Add your video/demo logic here
-    window.open('https://your-demo-video-url.com', '_blank');
-  };
-
   const downloadImage = () => {
     if (futureImage && studentName) {
       // Create a card for both age groups with name and profession
@@ -207,156 +203,88 @@ export default function Home() {
     const ctx = canvas.getContext('2d');
     if (!ctx || !futureImage) return;
 
-    // Professional card dimensions (16:20 aspect ratio)
-    canvas.width = 1200;
-    canvas.height = 1500;
+    // 16x20 ratio dimensions (portrait orientation)
+    canvas.width = 1600; // 16 inches at 100 DPI
+    canvas.height = 2000; // 20 inches at 100 DPI
 
-    // Create gradient background
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#f8fafc');
-    gradient.addColorStop(1, '#e2e8f0');
-    ctx.fillStyle = gradient;
+    // Create white background to match the result page
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Add outer frame border
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-    // Add inner decorative border
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
 
     // Load and draw the generated image
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      // Main image section - reduced by 5% and maintain aspect ratio
-      const maxImgWidth = canvas.width * 0.70; // Reduced from 75% to 70%
-      const maxImgHeight = canvas.height * 0.50; // Reduced from 55% to 50%
+      // Main image section - takes up most of the card like on result page
+      const imgSize = Math.min(canvas.width - 120, canvas.height - 400); // Leave space for text
+      const imgX = (canvas.width - imgSize) / 2;
+      const imgY = 60;
 
-      // Calculate proper dimensions maintaining aspect ratio
-      const imgAspectRatio = img.width / img.height;
-      const containerAspectRatio = maxImgWidth / maxImgHeight;
-
-      let imgWidth, imgHeight;
-      if (imgAspectRatio > containerAspectRatio) {
-        // Image is wider - fit to width
-        imgWidth = maxImgWidth;
-        imgHeight = maxImgWidth / imgAspectRatio;
-      } else {
-        // Image is taller - fit to height
-        imgHeight = maxImgHeight;
-        imgWidth = maxImgHeight * imgAspectRatio;
-      }
-
-      const imgX = (canvas.width - imgWidth) / 2;
-      const imgY = 80;
-
-      // Add image background/mat
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(imgX - 15, imgY - 15, imgWidth + 30, imgHeight + 30);
-
-      // Add mat border
-      ctx.strokeStyle = '#d1d5db';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(imgX - 15, imgY - 15, imgWidth + 30, imgHeight + 30);
-
-      // Draw the main image without stretching
+      // Draw the main image exactly as shown on result page
       ctx.save();
       ctx.beginPath();
-      ctx.roundRect(imgX, imgY, imgWidth, imgHeight, 12);
+      ctx.roundRect(imgX, imgY, imgSize, imgSize, 48); // Larger corner radius for bigger image
       ctx.clip();
-      ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+      ctx.drawImage(img, imgX, imgY, imgSize, imgSize);
       ctx.restore();
 
-      // Add elegant image border
-      ctx.strokeStyle = '#6b7280';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.roundRect(imgX, imgY, imgWidth, imgHeight, 12);
-      ctx.stroke();
-
-      // Add decorative separator line
-      const separatorY = imgY + imgHeight + 40;
-      ctx.strokeStyle = '#94a3b8';
+      // Add subtle border like on result page
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(canvas.width * 0.2, separatorY);
-      ctx.lineTo(canvas.width * 0.8, separatorY);
+      ctx.roundRect(imgX, imgY, imgSize, imgSize, 48);
       ctx.stroke();
 
-      // Name section - elegant typography
-      const nameY = separatorY + 60;
-      ctx.fillStyle = '#1e293b'; // Dark slate
-      ctx.font = 'bold 52px Georgia, serif';
+      // Name section
+      const nameY = imgY + imgSize + 80;
+      ctx.fillStyle = '#1f2937'; // Dark gray
+      ctx.font = 'bold 72px system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(studentName, canvas.width / 2, nameY);
 
-      // Profession title - styled subtitle
-      const professionY = nameY + 65;
-      ctx.fillStyle = '#475569'; // Medium slate
-      ctx.font = 'italic 42px Georgia, serif';
+      // Profession title
+      const professionY = nameY + 80;
+      ctx.fillStyle = '#374151'; // Slightly lighter gray
+      ctx.font = 'bold 60px system-ui, -apple-system, sans-serif';
       const profession = ageGroup === '5-10' ? dreamProfession : suggestedProfession;
       ctx.fillText(`Future ${profession}`, canvas.width / 2, professionY);
 
       // Add AI-generated description if available
       if (futureSelfDescription) {
-        const descriptionY = professionY + 70;
-        ctx.fillStyle = '#64748b'; // Slate gray for readability
-        ctx.font = '32px Georgia, serif';
+        const descriptionY = professionY + 80;
+        ctx.fillStyle = '#374151'; // Darker gray for description
+        ctx.font = '42px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
 
-        // Word wrap the description with elegant spacing
-        const maxWidth = canvas.width - 160;
+        // Word wrap the description
+        const maxWidth = canvas.width - 200; // Margins
         const words = futureSelfDescription.split(' ');
         let line = '';
         let currentY = descriptionY;
-        const lineHeight = 45;
-        let lineCount = 0;
-        const maxLines = 4;
+        const lineHeight = 60;
 
-        for (let n = 0; n < words.length && lineCount < maxLines; n++) {
+        for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
           const metrics = ctx.measureText(testLine);
           const testWidth = metrics.width;
 
           if (testWidth > maxWidth && n > 0) {
-            // If this is the last allowed line, add ellipsis if there are more words
-            if (lineCount === maxLines - 1 && n < words.length - 1) {
-              line = line.trim() + '...';
-            }
             ctx.fillText(line, canvas.width / 2, currentY);
             line = words[n] + ' ';
             currentY += lineHeight;
-            lineCount++;
           } else {
             line = testLine;
           }
         }
-
-        // Draw the last line if we haven't exceeded max lines
-        if (lineCount < maxLines && line.trim()) {
-          ctx.fillText(line, canvas.width / 2, currentY);
-        }
+        ctx.fillText(line, canvas.width / 2, currentY);
       }
 
-      // Add decorative footer separator
-      const footerSeparatorY = canvas.height - 120;
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(canvas.width * 0.25, footerSeparatorY);
-      ctx.lineTo(canvas.width * 0.75, footerSeparatorY);
-      ctx.stroke();
-
-      // Footer section with elegant branding
-      const footerY = canvas.height - 70;
-      ctx.fillStyle = '#94a3b8'; // Elegant gray
-      ctx.font = '28px Georgia, serif';
+      // Footer section with branding - small text as requested
+      const footerY = canvas.height - 60;
+      ctx.fillStyle = '#9ca3af'; // Light gray
+      ctx.font = '28px system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('✨ Created by FutureSelf AI ✨', canvas.width / 2, footerY);
+      ctx.fillText('by FutureSelf AI', canvas.width / 2, footerY);
 
       // Download the card
       canvas.toBlob((blob) => {
@@ -598,7 +526,7 @@ export default function Home() {
                 >
                   <Button
                     size="lg"
-                    onClick={() => setStep('age')}
+                    onClick={() => setStep('gender')}
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                   >
                     Continue Your Journey
@@ -609,56 +537,6 @@ export default function Home() {
             </CardContent>
           </motion.div>
         );
-
-      case 'age':
-        return (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-            <CardHeader>
-              <Calendar className="mx-auto h-12 w-12 text-primary" />
-              <CardTitle className="text-2xl font-bold mt-4">What's Your Age?</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground mt-2">
-                This helps us create the perfect future vision for you
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-8">
-              <div className="max-w-xs mx-auto">
-                <label htmlFor="age-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Enter your age
-                </label>
-                <input
-                  id="age-input"
-                  type="number"
-                  min={ageGroup === '5-10' ? 5 : 11}
-                  max={ageGroup === '5-10' ? 10 : 17}
-                  value={userAge || ''}
-                  onChange={(e) => setUserAge(e.target.value ? parseInt(e.target.value) : undefined)}
-                  className="w-full px-4 py-3 text-lg text-center border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  placeholder={ageGroup === '5-10' ? '5-10' : '11-17'}
-                />
-              </div>
-
-              {userAge && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="pt-4"
-                >
-                  <Button
-                    size="lg"
-                    onClick={() => setStep('gender')}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                  >
-                    Continue
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </motion.div>
-              )}
-            </CardContent>
-          </motion.div>
-        );
-
       case 'gender':
         return (
           <motion.div
@@ -841,10 +719,13 @@ export default function Home() {
                 </div>
               </motion.div>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                Take Your Photo, {studentName}!
+                {ageGroup === '5-10' ? `Take Your Photo, ${studentName}!` : `Add Your Photo, ${studentName}!`}
               </CardTitle>
               <CardDescription className="text-lg text-muted-foreground mt-2">
-                Let's capture your photo to create your future as a {dreamProfession}
+                {ageGroup === '5-10'
+                  ? `Let's capture your photo to create your future as a ${dreamProfession}`
+                  : `Upload or take a photo to visualize your future career`
+                }
               </CardDescription>
             </CardHeader>
 
@@ -855,7 +736,7 @@ export default function Home() {
                 transition={{ delay: 0.4 }}
                 className="w-full flex justify-center"
               >
-                <ImageUploader onImageUpload={handleCameraCapture} autoStartCamera={false} />
+                <ImageUploader onImageUpload={handleCameraCapture} />
               </motion.div>
 
               <motion.div
@@ -865,12 +746,16 @@ export default function Home() {
                 className="text-center"
               >
                 <p className="text-sm text-muted-foreground max-w-md">
-                  📸 Choose to upload a photo or take one with your camera! We'll create an amazing picture of you as a future {dreamProfession}!
+                  {ageGroup === '5-10'
+                    ? `📸 Choose to upload a photo or take one with your camera! We'll create an amazing picture of you as a future ${dreamProfession}!`
+                    : `📸 Upload a photo from your device or take one with your camera for the best results!`
+                  }
                 </p>
               </motion.div>
             </CardContent>
           </motion.div>
         );
+
       case 'quiz':
         return <Quiz onSubmit={handleQuizSubmit} onProgressUpdate={setProgress} isLoading={isLoading} ageGroup={ageGroup} />;
       case 'summary':
@@ -943,7 +828,7 @@ export default function Home() {
                 transition={{ delay: 0.4 }}
                 className="w-full flex justify-center"
               >
-                <ImageUploader onImageUpload={(dataUri) => setUserImage(dataUri || undefined)} autoStartCamera={false} />
+                <ImageUploader onImageUpload={(dataUri) => setUserImage(dataUri || undefined)} />
               </motion.div>
 
               {/* Photo Tips */}
