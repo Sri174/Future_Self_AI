@@ -9,18 +9,29 @@ import Image from 'next/image';
 
 interface ImageUploaderProps {
   onImageUpload: (dataUri: string | null) => void;
-  autoStartCamera?: boolean;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartCamera = false }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Auto-start camera when component mounts
+  useEffect(() => {
+    startCamera();
+
+    // Cleanup on unmount
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -30,10 +41,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
         const dataUri = e.target?.result as string;
         setImagePreview(dataUri);
         onImageUpload(dataUri);
+        toast({
+          title: "Photo Uploaded!",
+          description: "Your photo has been uploaded successfully.",
+        });
       };
       reader.readAsDataURL(file);
     }
-  }, [onImageUpload]);
+  }, [onImageUpload, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -43,109 +58,101 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
 
   // Camera functions
   const startCamera = async () => {
+    console.log('🚀 Starting camera...');
     try {
       setCameraError(null);
+      setVideoReady(false);
 
       // Check if camera is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera not supported on this device');
       }
 
-      // Show loading state
-      toast({
-        title: "Starting Camera",
-        description: "Requesting camera permission...",
-      });
+      // Set camera active first to show loading state
+      setIsCameraActive(true);
 
-      let constraints = {
-        video: {
-          facingMode: facingMode,
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 }
-        }
-      };
-
-      let stream;
+      // Get camera stream - try simple approach first
+      let stream: MediaStream;
       try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (error) {
-        console.warn('Failed with high resolution, trying basic constraints:', error);
-        // Fallback to basic constraints
-        constraints = {
+        console.log('📹 Requesting camera with facingMode:', facingMode);
+        stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: facingMode
+            facingMode: facingMode,
+            width: { ideal: 640 },
+            height: { ideal: 480 }
           }
-        };
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        });
+      } catch (error) {
+        // Fallback to any camera
+        console.log('🔄 Fallback to any camera');
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
       }
+
+      console.log('✅ Camera stream obtained');
       streamRef.current = stream;
 
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        const video = videoRef.current;
 
-        // Wait for video to be ready
-        await new Promise((resolve, reject) => {
-          if (videoRef.current) {
-            videoRef.current.onloadedmetadata = () => {
-              console.log('Video metadata loaded');
-              resolve(true);
-            };
-            videoRef.current.onerror = (error) => {
-              console.error('Video error:', error);
-              reject(error);
-            };
-            // Timeout after 10 seconds
-            setTimeout(() => reject(new Error('Video loading timeout')), 10000);
-          }
-        });
+        // Clear any existing source first
+        video.srcObject = null;
 
+        // Set the new stream
+        video.srcObject = stream;
+        video.playsInline = true;
+        video.muted = true;
+        video.autoplay = true;
+
+        // Wait for video to load metadata
+        const handleLoadedMetadata = () => {
+          console.log('📺 Video metadata loaded, setting ready');
+          setVideoReady(true);
+        };
+
+        video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+
+        // Also try to play the video
         try {
-          await videoRef.current.play();
-          console.log('Video playing successfully');
+          await video.play();
+          console.log('▶️ Video playing');
         } catch (playError) {
-          console.error('Error playing video:', playError);
-          throw playError;
+          console.warn('Video play failed (but continuing):', playError);
+          // Set ready anyway in case autoplay is blocked
+          setVideoReady(true);
         }
+
+        // Fallback timeout in case loadedmetadata never fires
+        setTimeout(() => {
+          if (!videoReady) {
+            console.log('⏰ Timeout fallback - setting video ready');
+            setVideoReady(true);
+          }
+        }, 3000);
       }
 
-      setIsCameraActive(true);
-      toast({
-        title: "Camera Ready! 📸",
-        description: "Smile and click the capture button when ready!",
-      });
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('❌ Camera error:', error);
       let errorMessage = 'Failed to access camera';
-      let actionMessage = '';
 
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
-          errorMessage = 'Camera permission denied';
-          actionMessage = 'Please click "Allow" when your browser asks for camera permission, then try again.';
+          errorMessage = 'Camera permission denied. Please allow camera access and try again.';
         } else if (error.name === 'NotFoundError') {
-          errorMessage = 'No camera found';
-          actionMessage = 'Please make sure your device has a camera connected.';
-        } else if (error.name === 'NotReadableError') {
-          errorMessage = 'Camera is busy';
-          actionMessage = 'Please close other apps using the camera and try again.';
-        } else if (error.name === 'OverconstrainedError') {
-          errorMessage = 'Camera constraints not supported';
-          actionMessage = 'Your camera may not support the required settings.';
-        } else if (error.name === 'NotSupportedError') {
-          errorMessage = 'Camera not supported on this device';
-          actionMessage = 'Please try using a different device or browser.';
+          errorMessage = 'No camera found. Please make sure your device has a camera.';
         } else {
           errorMessage = error.message;
-          actionMessage = 'Please try refreshing the page and try again.';
         }
       }
 
-      setCameraError(`${errorMessage}. ${actionMessage}`);
+      setCameraError(errorMessage);
       toast({
         title: "Camera Error",
-        description: `${errorMessage}. ${actionMessage}`,
+        description: errorMessage,
         variant: "destructive",
       });
+
+      setIsCameraActive(false);
+      setVideoReady(false);
     }
   };
 
@@ -155,71 +162,76 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
       streamRef.current = null;
     }
     setIsCameraActive(false);
+    setVideoReady(false);
     setCameraError(null);
   };
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
+    if (!videoRef.current || !canvasRef.current) {
+      toast({
+        title: "Capture Failed",
+        description: "Camera not ready. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Check if video is ready and has dimensions
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        toast({
-          title: "Camera Not Ready",
-          description: "Please wait for the camera to fully load before capturing.",
-          variant: "destructive"
-        });
-        return;
-      }
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
 
+    // Check if video has valid dimensions
+    if (!video.videoWidth || !video.videoHeight) {
+      toast({
+        title: "Capture Failed",
+        description: "Camera feed not ready. Please wait a moment and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
       const ctx = canvas.getContext('2d');
-      if (ctx) {
-        // Clear canvas first
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the video frame
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert to data URI with high quality
-        const dataUri = canvas.toDataURL('image/jpeg', 0.9);
-
-        // Verify the image was captured properly
-        if (dataUri && dataUri.length > 1000) {
-          setImagePreview(dataUri);
-          onImageUpload(dataUri);
-          stopCamera();
-
-          toast({
-            title: "Photo Captured! 📸",
-            description: "Your photo has been captured successfully.",
-          });
-        } else {
-          toast({
-            title: "Capture Failed",
-            description: "Failed to capture photo. Please try again.",
-            variant: "destructive"
-          });
-        }
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
       }
-    } else {
+
+      // Draw the video frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert to data URL
+      const dataUri = canvas.toDataURL('image/jpeg', 0.8);
+
+      setImagePreview(dataUri);
+      onImageUpload(dataUri);
+      stopCamera();
+
       toast({
-        title: "Camera Error",
-        description: "Camera is not ready. Please try again.",
-        variant: "destructive"
+        title: "Photo Captured! 📸",
+        description: "Your photo has been captured successfully.",
+      });
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+      toast({
+        title: "Capture Failed",
+        description: "Failed to capture photo. Please try again.",
+        variant: "destructive",
       });
     }
   };
 
-  const switchCamera = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  const switchCamera = async () => {
+    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newFacingMode);
+
     if (isCameraActive) {
       stopCamera();
-      // Restart camera with new facing mode
-      setTimeout(() => startCamera(), 100);
+      // Wait a bit before restarting with new facing mode
+      setTimeout(() => {
+        startCamera();
+      }, 500);
     }
   };
 
@@ -227,18 +239,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
     setImagePreview(null);
     onImageUpload(null);
   };
-
-  // Auto-start camera if requested
-  useEffect(() => {
-    if (autoStartCamera && !isCameraActive && !imagePreview) {
-      // Add a small delay to ensure component is fully mounted
-      const timer = setTimeout(() => {
-        startCamera();
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [autoStartCamera, isCameraActive, imagePreview]);
 
   // Cleanup camera on unmount
   useEffect(() => {
@@ -249,17 +249,70 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
 
   // Camera view
   if (isCameraActive) {
+    console.log('🎥 Rendering camera view - isCameraActive:', isCameraActive, 'videoReady:', videoReady);
     return (
       <div className="w-full max-w-md space-y-4">
-        <div className="relative bg-black rounded-xl overflow-hidden shadow-2xl">
+        <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
           <video
             ref={videoRef}
-            className="w-full h-80 object-cover"
+            className="w-full h-80 object-cover bg-gray-800"
             autoPlay
             playsInline
             muted
+            onLoadedMetadata={() => {
+              console.log('🎬 Video metadata loaded in render');
+              if (videoRef.current) {
+                console.log('📐 Final video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+                console.log('📺 Video element state:', {
+                  srcObject: !!videoRef.current.srcObject,
+                  readyState: videoRef.current.readyState,
+                  paused: videoRef.current.paused,
+                  currentTime: videoRef.current.currentTime
+                });
+                // Ensure video ready is set when metadata loads
+                if (!videoReady) {
+                  console.log('🚀 Setting video ready from metadata event');
+                  setVideoReady(true);
+                }
+              }
+            }}
+            onPlay={() => {
+              console.log('▶️ Video play event in render');
+              if (!videoReady) {
+                console.log('🚀 Setting video ready from play event');
+                setVideoReady(true);
+              }
+            }}
+            onError={(e) => {
+              console.error('❌ Video error in render:', e);
+              setCameraError('Video playback failed. Please try again.');
+            }}
+            onCanPlay={() => {
+              console.log('✅ Video can play');
+              if (!videoReady) {
+                console.log('🚀 Setting video ready from canPlay event');
+                setVideoReady(true);
+              }
+            }}
+            onLoadStart={() => console.log('🔄 Video load start')}
+            style={{
+              minHeight: '320px',
+              backgroundColor: '#1f2937',
+              display: 'block',
+              width: '100%'
+            }}
           />
           <canvas ref={canvasRef} className="hidden" />
+
+          {/* Loading overlay - show only when camera is starting */}
+          {isCameraActive && !videoReady && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800/80">
+              <div className="text-center text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                <p className="text-sm">Loading camera...</p>
+              </div>
+            </div>
+          )}
 
           {/* Camera controls overlay */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-4">
@@ -268,6 +321,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
               size="icon"
               onClick={switchCamera}
               className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+              title="Switch Camera"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -275,7 +329,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
             <Button
               size="lg"
               onClick={capturePhoto}
-              className="bg-white text-black hover:bg-gray-100 rounded-full w-16 h-16 p-0"
+              className="bg-white text-black hover:bg-gray-100 rounded-full w-16 h-16 p-0 shadow-lg"
+              title="Capture Photo"
             >
               <div className="w-12 h-12 bg-white border-4 border-gray-300 rounded-full" />
             </Button>
@@ -285,16 +340,33 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, autoStartC
               size="icon"
               onClick={stopCamera}
               className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+              title="Stop Camera"
             >
               <CameraOff className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">
             Position yourself in the frame and click the capture button
           </p>
+          <p className="text-xs text-muted-foreground">
+            If the camera appears black, try switching cameras or refreshing the page
+          </p>
+
+          {/* Debug info */}
+          <div className="text-xs text-gray-500 space-y-1">
+            <div>Camera: {facingMode === 'user' ? 'Front' : 'Back'}</div>
+            {videoRef.current && (
+              <div>
+                Status: {videoRef.current.videoWidth ?
+                  `${videoRef.current.videoWidth}x${videoRef.current.videoHeight}` :
+                  'Loading...'
+                }
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
