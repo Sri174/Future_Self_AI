@@ -40,7 +40,7 @@ const Header: React.FC = () => {
           className="flex items-center gap-2"
         >
           <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
-            FutureSelf AI
+            MVAFutureSelf
           </h1>
           <motion.div
             animate={{
