@@ -17,7 +17,6 @@ export interface FutureSelfVisualizationInput {
   mindset: string;
   suggestedProfession: string;
   gender?: 'male' | 'female' | null;
-  userAge?: number;
 }
 
 export interface FutureSelfVisualizationResult {
