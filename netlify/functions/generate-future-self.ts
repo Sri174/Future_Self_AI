@@ -3,6 +3,21 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY!);
 
+// Add retry function at top of file
+async function retryWithBackoff(fn: () => Promise<any>, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      if (error.message?.includes('503') && i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, (i + 1) * 2000));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 // Helper function to create consistent headers
 const createHeaders = (contentType: string = 'application/json') => ({
   'Access-Control-Allow-Origin': '*',
@@ -11,33 +26,54 @@ const createHeaders = (contentType: string = 'application/json') => ({
 
 // Function to create a professional placeholder image
 function createPlaceholderImage(profession: string, description: string): string {
-  // Create a simple SVG placeholder with profession-specific styling
-  const professionColors: { [key: string]: { bg: string; accent: string } } = {
-    'Social Worker': { bg: '#e8f5e8', accent: '#4caf50' },
-    'Doctor': { bg: '#e3f2fd', accent: '#2196f3' },
-    'Teacher': { bg: '#fff3e0', accent: '#ff9800' },
-    'Software Developer': { bg: '#f3e5f5', accent: '#9c27b0' },
-    'Environmental Scientist': { bg: '#e0f2f1', accent: '#009688' },
-    'Artist': { bg: '#fce4ec', accent: '#e91e63' },
-    'Engineer': { bg: '#e8eaf6', accent: '#3f51b5' },
-    'default': { bg: '#f5f5f5', accent: '#607d8b' }
+  // Create a more sophisticated SVG placeholder with profession-specific styling
+  const professionData: { [key: string]: { bg: string; accent: string; icon: string } } = {
+    'Social Worker': { bg: '#e8f5e8', accent: '#4caf50', icon: '👥' },
+    'Doctor': { bg: '#e3f2fd', accent: '#2196f3', icon: '🩺' },
+    'Teacher': { bg: '#fff3e0', accent: '#ff9800', icon: '📚' },
+    'Software Developer': { bg: '#f3e5f5', accent: '#9c27b0', icon: '💻' },
+    'Environmental Scientist': { bg: '#e0f2f1', accent: '#009688', icon: '🌱' },
+    'Artist': { bg: '#fce4ec', accent: '#e91e63', icon: '🎨' },
+    'Fashion Designer': { bg: '#f8e6ff', accent: '#8e24aa', icon: '✂️' },
+    'Engineer': { bg: '#e8eaf6', accent: '#3f51b5', icon: '⚙️' },
+    'Scientist': { bg: '#e1f5fe', accent: '#0277bd', icon: '🔬' },
+    'default': { bg: '#f5f5f5', accent: '#607d8b', icon: '💼' }
   };
 
-  const colors = professionColors[profession] || professionColors['default'];
+  const data = professionData[profession] || professionData['default'];
 
   const svg = `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    <svg width="512" height="384" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${colors.bg};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${colors.accent};stop-opacity:0.3" />
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${data.bg};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${data.accent};stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="personGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:${data.accent};stop-opacity:0.8" />
+          <stop offset="100%" style="stop-color:${data.accent};stop-opacity:0.6" />
         </linearGradient>
       </defs>
-      <rect width="400" height="300" fill="url(#grad)" />
-      <circle cx="200" cy="120" r="40" fill="${colors.accent}" opacity="0.7" />
-      <rect x="160" y="160" width="80" height="100" fill="${colors.accent}" opacity="0.5" rx="5" />
-      <text x="200" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="${colors.accent}">
-        Future ${profession}
+
+      <!-- Background -->
+      <rect width="512" height="384" fill="url(#bgGrad)" />
+
+      <!-- Professional figure -->
+      <circle cx="256" cy="140" r="45" fill="url(#personGrad)" />
+      <rect x="211" y="185" width="90" height="120" fill="url(#personGrad)" rx="8" />
+
+      <!-- Professional icon -->
+      <circle cx="320" cy="120" r="25" fill="${data.accent}" opacity="0.9" />
+      <text x="320" y="130" text-anchor="middle" font-size="20" fill="white">${data.icon}</text>
+
+      <!-- Title -->
+      <text x="256" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="${data.accent}">
+        Your Future as a ${profession}
+      </text>
+
+      <!-- Subtitle -->
+      <text x="256" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="${data.accent}" opacity="0.8">
+        AI-Generated Visualization
       </text>
     </svg>
   `;
@@ -94,12 +130,12 @@ export const handler: Handler = async (event) => {
     // Generate text description with profession-specific context
     console.log('Initializing text generation model...');
     const textModel = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash", // Fallback to more stable model
       generationConfig: {
-        temperature: 0.8,
-        topP: 0.9,
-        topK: 40,
-        maxOutputTokens: 500,
+        temperature: 0.7, // Reduce temperature
+        topP: 0.8,
+        topK: 30,
+        maxOutputTokens: 300,
       }
     });
 
@@ -135,7 +171,7 @@ Write a compelling 2-3 sentence description that vividly portrays them succeedin
     let futureSelfDescription = '';
 
     try {
-      const textResult = await textModel.generateContent(textPrompt);
+      const textResult = await retryWithBackoff(() => textModel.generateContent(textPrompt));
       futureSelfDescription = textResult.response.text().trim();
       console.log('Text description generated successfully');
     } catch (textError) {
@@ -148,12 +184,6 @@ Write a compelling 2-3 sentence description that vividly portrays them succeedin
     // Generate image using Gemini's image generation capabilities
     let generatedImage = '';
 
-    // For now, let's skip image generation and use placeholder to avoid 500 errors
-    console.log('Using placeholder image to avoid API issues');
-    generatedImage = createPlaceholderImage(suggestedProfession, futureSelfDescription);
-
-    // Commented out image generation temporarily to debug the 500 error
-    /*
     try {
       const imagePromptParts = [];
 
@@ -242,10 +272,10 @@ Write a compelling 2-3 sentence description that vividly portrays them succeedin
 
       imagePromptParts.push({ text: imagePromptText });
 
-      console.log('Attempting image generation with Gemini...');
+      console.log('🎨 Attempting AI image generation with Gemini...');
 
-      // For image generation, we need to use a different approach
-      const imageResult = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${process.env.GOOGLE_GENAI_API_KEY}`, {
+      // Try the image generation API with better error handling
+      const imageResult = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GOOGLE_GENAI_API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -256,40 +286,87 @@ Write a compelling 2-3 sentence description that vividly portrays them succeedin
             parts: imagePromptParts
           }],
           generationConfig: {
-            responseModalities: ['TEXT', 'IMAGE'],
             temperature: 0.8,
+            topP: 0.9,
+            maxOutputTokens: 4096,
           }
         })
       });
 
       if (!imageResult.ok) {
         const errorText = await imageResult.text();
-        console.error(`Image generation failed: ${imageResult.status} ${imageResult.statusText}`, errorText);
-        throw new Error(`Image generation failed: ${imageResult.status} ${imageResult.statusText}`);
-      }
+        console.error(`❌ Image generation failed: ${imageResult.status} ${imageResult.statusText}`, errorText);
 
-      const imageData = await imageResult.json();
+        // Try alternative approach with different model
+        try {
+          console.log('🔄 Trying alternative image generation approach...');
 
-      console.log('Image generation response received');
+          const fallbackResult = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_GENAI_API_KEY}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contents: [{
+                role: 'user',
+                parts: [{ text: `Generate a professional image of a ${suggestedProfession} at work. Show them in their typical work environment with profession-specific tools and setting. Make it realistic and inspiring.` }]
+              }],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 2048,
+              }
+            })
+          });
 
-      // Try to extract image data from response
-      if (imageData.candidates && imageData.candidates[0]) {
-        const candidate = imageData.candidates[0];
-        if (candidate.content && candidate.content.parts) {
-          for (const part of candidate.content.parts) {
-            if (part.inlineData) {
-              generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-              console.log('Successfully extracted generated image');
-              break;
+          if (fallbackResult.ok) {
+            const fallbackData = await fallbackResult.json();
+            if (fallbackData.candidates && fallbackData.candidates[0]) {
+              const candidate = fallbackData.candidates[0];
+              if (candidate.content && candidate.content.parts) {
+                for (const part of candidate.content.parts) {
+                  if (part.inlineData) {
+                    generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                    console.log('✅ Fallback AI image generated successfully!');
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        } catch (fallbackError) {
+          console.log('❌ Fallback image generation also failed');
+        }
+
+        // If still no image, use placeholder
+        if (!generatedImage) {
+          console.log('📋 Using enhanced placeholder as final fallback');
+          generatedImage = createPlaceholderImage(suggestedProfession, futureSelfDescription);
+        }
+      } else {
+
+        const imageData = await imageResult.json();
+
+        console.log('📥 Image generation response received');
+
+        // Try to extract image data from response
+        if (imageData.candidates && imageData.candidates[0]) {
+          const candidate = imageData.candidates[0];
+          if (candidate.content && candidate.content.parts) {
+            for (const part of candidate.content.parts) {
+              if (part.inlineData) {
+                generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                console.log('✅ Successfully extracted AI-generated image!');
+                break;
+              }
             }
           }
         }
-      }
 
-      // If no image was extracted, use placeholder
-      if (!generatedImage) {
-        console.log('No image extracted, using placeholder');
-        generatedImage = createPlaceholderImage(suggestedProfession, futureSelfDescription);
+        // If no image was extracted, use placeholder
+        if (!generatedImage) {
+          console.log('⚠️ No image extracted from response, using placeholder');
+          generatedImage = createPlaceholderImage(suggestedProfession, futureSelfDescription);
+        }
       }
     } catch (imageError) {
       console.error('Image generation failed:', imageError);
@@ -297,7 +374,6 @@ Write a compelling 2-3 sentence description that vividly portrays them succeedin
       // Create a professional placeholder instead of using original photo
       generatedImage = createPlaceholderImage(suggestedProfession, futureSelfDescription);
     }
-    */
 
     return {
       statusCode: 200,
@@ -317,3 +393,4 @@ Write a compelling 2-3 sentence description that vividly portrays them succeedin
     };
   }
 };
+
