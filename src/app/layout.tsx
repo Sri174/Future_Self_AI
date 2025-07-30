@@ -3,12 +3,12 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'FutureSelf AI',
+  title: 'MVAFutureSelf',
   description: 'Visualize your future self with the power of AI.',
   keywords: ['AI', 'future self', 'career prediction', 'visualization', 'artificial intelligence'],
-  authors: [{ name: 'FutureSelf AI Team' }],
-  creator: 'FutureSelf AI',
-  publisher: 'FutureSelf AI',
+  authors: [{ name: 'MVAFutureSelf Team' }],
+  creator: 'MVAFutureSelf',
+  publisher: 'MVAFutureSelf',
   formatDetection: {
     email: false,
     address: false,
@@ -26,16 +26,16 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'FutureSelf AI',
+    title: 'MVAFutureSelf',
     description: 'Visualize your future self with the power of AI.',
     url: 'https://futureself-ai.netlify.app',
-    siteName: 'FutureSelf AI',
+    siteName: 'MVAFutureSelf',
     images: [
       {
         url: '/icon.png',
         width: 1200,
         height: 630,
-        alt: 'FutureSelf AI - Visualize your future self',
+        alt: 'MVAFutureSelf - Visualize your future self',
       },
     ],
     locale: 'en_US',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FutureSelf AI',
+    title: 'MVAFutureSelf',
     description: 'Visualize your future self with the power of AI.',
     images: ['/icon.png'],
   },
