@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
 
     console.log('🧠 Starting MCQ analysis...');
 
+    // Check if API key is available and valid
+    if (!process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_GENAI_API_KEY.length < 20) {
+      console.log('⚠️ Invalid or missing Google AI API key, using intelligent fallback analysis');
+      return NextResponse.json(createIntelligentFallbackAnalysis(answers, ageGroup));
+    }
+
     // Set timeout for the entire analysis process
     const analysisTimeout = setTimeout(() => {
       console.log('⏰ MCQ analysis timeout reached');
@@ -146,6 +152,50 @@ Respond in valid JSON format:
   }
 }
 
+// Helper function to create intelligent fallback analysis based on answers
+function createIntelligentFallbackAnalysis(answers: any, ageGroup?: string) {
+  const answerValues = Object.values(answers).join(' ').toLowerCase();
+
+  // Analyze interests based on keywords in answers
+  let interests = 'Technology and Problem-solving';
+  let suggestedProfession = 'Software Developer';
+  let mindset = 'Analytical and Growth-oriented';
+
+  // Check for creative interests
+  if (answerValues.includes('art') || answerValues.includes('creative') || answerValues.includes('design') || answerValues.includes('music')) {
+    interests = 'Creative Arts and Design';
+    suggestedProfession = 'Artist';
+    mindset = 'Creative and Innovative';
+  }
+  // Check for healthcare interests
+  else if (answerValues.includes('help') || answerValues.includes('people') || answerValues.includes('health') || answerValues.includes('care')) {
+    interests = 'Healthcare and Social Impact';
+    suggestedProfession = 'Social Worker';
+    mindset = 'Collaborative and Empathetic';
+  }
+  // Check for teaching interests
+  else if (answerValues.includes('teach') || answerValues.includes('learn') || answerValues.includes('education') || answerValues.includes('school')) {
+    interests = 'Education and Knowledge Sharing';
+    suggestedProfession = 'Teacher';
+    mindset = 'Collaborative and Growth-oriented';
+  }
+  // Check for science interests
+  else if (answerValues.includes('science') || answerValues.includes('research') || answerValues.includes('experiment') || answerValues.includes('discover')) {
+    interests = 'Scientific Research and Discovery';
+    suggestedProfession = 'Environmental Scientist';
+    mindset = 'Analytical and Research-focused';
+  }
+
+  const summary = `A motivated individual with strong ${mindset.toLowerCase()} approach and passion for ${interests.toLowerCase()}. Shows excellent potential for success in ${suggestedProfession.toLowerCase()} roles and demonstrates enthusiasm for making a positive impact in their chosen field.`;
+
+  return {
+    interests,
+    mindset,
+    summary,
+    suggestedProfession
+  };
+}
+
 // Helper function to extract fields from text response
 function extractField(text: string, field: string): string | null {
   const patterns = [
@@ -153,7 +203,7 @@ function extractField(text: string, field: string): string | null {
     new RegExp(`${field}[:\\s]+([^\n]+)`, 'i'),
     new RegExp(`\\*\\*${field}\\*\\*[:\\s]+([^\n]+)`, 'i'),
   ];
-  
+
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match && match[1]) {
