@@ -284,7 +284,7 @@ export default function Home() {
       ctx.fillStyle = '#9ca3af'; // Light gray
       ctx.font = '28px system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('by FutureSelf AI', canvas.width / 2, footerY);
+      ctx.fillText('by MVAFutureSelf', canvas.width / 2, footerY);
 
       // Download the card
       canvas.toBlob((blob) => {
@@ -390,8 +390,8 @@ export default function Home() {
                 transition={{ delay: 0.4 }}
               >
                 <CardTitle className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
-                  MVAFutureSelf AI
-                   <CardTitle className="text-2xl md:text-1xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">  
+                  MVAFutureSelf
+                   <CardTitle className="text-2xl md:text-1xl font-semibold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">  
                     Powered by Skill Satron Tecnologies Pvt.Ltd
                    </CardTitle>
                  </CardTitle>
