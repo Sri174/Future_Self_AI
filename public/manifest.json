@@ -1,6 +1,6 @@
 {
-  "name": "FutureSelf AI",
-  "short_name": "FutureSelf AI",
+  "name": "MVAFutureSelf",
+  "short_name": "MVAFutureSelf",
   "description": "Visualize your future self with the power of AI",
   "start_url": "/",
   "display": "standalone",
