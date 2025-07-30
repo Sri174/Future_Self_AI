@@ -102,7 +102,7 @@ function createPlaceholderImage(profession: string, description: string): string
 
 export async function POST(request: NextRequest) {
   try {
-    const { photoDataUri, interests, mindset, suggestedProfession, gender, userAge } = await request.json();
+    const { photoDataUri, interests, mindset, suggestedProfession, gender } = await request.json();
 
     if (!suggestedProfession) {
       return NextResponse.json(
@@ -122,23 +122,15 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Calculate future age (15-20 years from now)
-    const futureYearsFromNow = 15 + Math.floor(Math.random() * 6); // Random between 15-20 years
-    const futureAge = userAge ? userAge + futureYearsFromNow : 30; // Default to 30 if no age provided
-
     const textPrompt = `You are an expert career counselor and motivational writer. Your task is to create an inspiring, vivid description of a student's future self that perfectly matches their suggested profession and work environment.
 
 **Student Profile:**
-- **Current Age:** ${userAge || 'Unknown'}
-- **Future Age:** ${futureAge} years old (${futureYearsFromNow} years from now)
 - **Interests:** ${interests}
 - **Mindset:** ${mindset}
 - **Suggested Profession:** ${suggestedProfession}
 
 **Instructions:**
-1. **Age and Experience:** Write about them as a ${futureAge}-year-old professional with ${futureYearsFromNow} years of experience in their field, showing maturity, expertise, and leadership.
-
-2. **Professional Context:** Write about them actively working in their **${suggestedProfession}** role, describing the specific environment, tools, and activities authentic to this profession.
+1. **Professional Context:** Write about them actively working in their **${suggestedProfession}** role, describing the specific environment, tools, and activities authentic to this profession.
 
 2. **Environment Alignment:** The description MUST match the professional environment:
    - If "Environmental Scientist" or "Marine Biologist" → Describe them working in nature, field research, outdoor settings
@@ -156,7 +148,7 @@ export async function POST(request: NextRequest) {
 
 5. **Inspiring Tone:** Make it motivational and forward-looking, showing them thriving and making an impact in their chosen field.
 
-Write a compelling 2-3 sentence description that vividly portrays them succeeding in their specific professional environment as a ${futureAge}-year-old expert.`;
+Write a compelling 2-3 sentence description that vividly portrays them succeeding in their specific professional environment.`;
     
     const textResult = await textModel.generateContent(textPrompt);
     let futureSelfDescription = textResult.response.text().trim();
@@ -212,21 +204,15 @@ Write an inspiring description showing them thriving as a ${suggestedProfession}
         }
       }
 
-      // Calculate future age (15-20 years from now)
-      const futureYearsFromNow = 15 + Math.floor(Math.random() * 6); // Random between 15-20 years
-      const futureAge = userAge ? userAge + futureYearsFromNow : 30; // Default to 30 if no age provided
-
       const imagePromptText = photoDataUri
-        ? `GENERATE AN IMAGE OF A ${futureAge}-YEAR-OLD ${suggestedProfession.toUpperCase()} ONLY.
+        ? `GENERATE AN IMAGE OF A ${suggestedProfession.toUpperCase()} ONLY.
 
 **CRITICAL PROFESSION MATCH**: You MUST generate an image that matches EXACTLY with "${suggestedProfession}".
-
-**Age and Maturity**: Show the person as a ${futureAge}-year-old professional (${futureYearsFromNow} years from now). They should look mature, experienced, and successful in their career.
 
 **Profession-Specific Requirements:**
 ${getProfessionSpecificPrompt(suggestedProfession)}
 
-**Identity Preservation:** Preserve the person's facial features, ethnicity, and bone structure from the uploaded photo while aging them appropriately to ${futureAge} years old.
+**Identity Preservation:** Preserve the person's facial features, ethnicity, and age from the uploaded photo.
 
 **FRAMING REQUIREMENTS:**
 - Show the person from waist up or three-quarter body shot
@@ -249,16 +235,13 @@ Generate a photorealistic image of them working as a ${suggestedProfession} in t
         : `You are an expert AI image generator. Your task is to create a photorealistic, inspiring, and highly-detailed image of a person's future self that perfectly matches their suggested profession and work environment.
 
             **Analysis Results:**
-            - **Future Age:** ${futureAge} years old (${futureYearsFromNow} years from now)
             - **Interests:** ${interests}
             - **Mindset:** ${mindset}
             - **Suggested Profession:** ${suggestedProfession}
             - **Gender:** ${gender || 'unspecified'}
 
             **Critical Instructions:**
-            1. **Age and Maturity:** Show a ${futureAge}-year-old ${gender || 'person'} who is mature, experienced, and successful in their career. They should have the confidence and expertise that comes with years of professional experience.
-
-            2. **Professional Environment Match:** Generate a high-fidelity image showing this ${futureAge}-year-old ${gender || 'person'} actively working in their **${suggestedProfession}** role with profession-specific environment:
+            1. **Professional Environment Match:** Generate a high-fidelity image showing a ${gender || 'person'} actively working in their **${suggestedProfession}** role with profession-specific environment:
                 - **Social Work/Community roles** (Social Worker, Community Organizer, Counselor): Community center, office with clients, meeting room, or helping people in community settings - NO medical equipment like stethoscopes
                 - **Healthcare roles** (Doctor, Nurse, Medical professional): Hospital, clinic, or medical facility with medical equipment like stethoscopes, medical charts
                 - **Environmental/Nature roles** (Environmental Scientist, Marine Biologist, Landscape Architect): Show them outdoors in natural settings, field research, with nature-specific tools
